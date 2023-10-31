@@ -14,6 +14,12 @@ enum GameState {
 	PAUSED
 };
 
+struct Camera {
+	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
+	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+};
+
 class Game
 {
 public:
@@ -31,7 +37,7 @@ public:
 
 	void Render();
 	void DrawObject(GameObject* obj);
-	//void DrawStats();
+	void DrawStats();
 
 	//void Restart();
 
@@ -44,9 +50,13 @@ public:
 
 private:
 
-	glm::mat4 projection;
+	glm::mat4 projection, view = glm::mat4(1.0f);
+	Camera camera;
+
 
 	std::vector<GameObject*> objList;
+
+	std::vector<GameObject*> staticObj;
 
 	int width, height;
 	glm::vec2 cursorPos;
