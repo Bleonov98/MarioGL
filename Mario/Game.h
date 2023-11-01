@@ -16,6 +16,7 @@ enum GameState {
 
 struct Camera {
 	glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+	glm::vec3 savePos = glm::vec3(0.0f);
 	glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
 	glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
 };
@@ -41,7 +42,10 @@ public:
 
 	//void Restart();
 
-	// game
+	// level
+	void InitLevelObjects();
+	void InitSolidObjects();
+	void InitTubes();
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
@@ -53,12 +57,11 @@ private:
 	glm::mat4 projection, view = glm::mat4(1.0f);
 	Camera camera;
 
-
+	std::vector<GameObject*> staticObj;
 	std::vector<GameObject*> objList;
 
-	std::vector<GameObject*> staticObj;
-
 	int width, height;
+	bool toggle = false;
 	glm::vec2 cursorPos;
 
 	GameState gmState = MENU;

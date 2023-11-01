@@ -46,4 +46,17 @@ protected:
 
 };
 
+class Tube : public GameObject
+{
+public:
+	Tube(glm::vec2 position, glm::vec2 size, bool isActive = false, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : GameObject(position, size, angle, color) {
+		this->isActive = isActive;
+	}
+	
+	bool IsActive() { return this->isActive; }
+
+private:
+	bool isActive;
+};
+
 #endif // !GAMEOBJECT_H
