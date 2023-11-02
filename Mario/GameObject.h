@@ -22,6 +22,8 @@ public:
 
 	void SetTexture(Texture texture) { mesh.AddTexture(texture); }
 	void UpdateAABB() { hBox.SetBorder(position, position + size); }
+	
+	void DeleteObject() { this->deleted = true; }
 
 	// Get
 	glm::vec2 GetPos() { return position; }
@@ -34,6 +36,8 @@ public:
 
 	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
 	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
+	
+	bool IsDeleted() { return deleted; }
 
 protected:
 
@@ -43,7 +47,7 @@ protected:
 	glm::vec3 color;
 	glm::vec2 position, size;
 	float angle;
-
+	bool deleted = false;
 };
 
 class Tube : public GameObject

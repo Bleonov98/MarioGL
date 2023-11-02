@@ -8,15 +8,20 @@ class DynamicObject : public GameObject
 {
 public:
 
-	DynamicObject(glm::vec2 position, glm::vec2 size, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : GameObject(position, size, angle, color) {};
+	DynamicObject(glm::vec2 position, glm::vec2 size, float speed = 0.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : GameObject(position, size, angle, color) {
+		this->speed = speed;
+	};
 
-	virtual void PlayAnimation(float dt) = 0;
+	virtual void PlayAnimation() = 0;
 
 	virtual void Move(float dt) = 0;
 
+	float GetSpeed() { return speed; }
 
+protected:
 
-private:
+	float speed;
+	int frame = 0;
 
 };
 

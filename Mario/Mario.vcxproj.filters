@@ -28,7 +28,9 @@
     <ClCompile Include="Texture.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicObject.cpp" />
+    <ClCompile Include="Brick.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -55,7 +57,12 @@
     <ClInclude Include="Shader.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="DynamicObject.h" />
+    <ClInclude Include="DynamicObject.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Brick.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
