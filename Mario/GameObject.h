@@ -22,8 +22,6 @@ public:
 
 	void SetTexture(Texture texture) { mesh.AddTexture(texture); }
 	void UpdateAABB() { hBox.SetBorder(position, position + size); }
-	
-	void DeleteObject() { this->deleted = true; }
 
 	// Get
 	glm::vec2 GetPos() { return position; }
@@ -36,8 +34,13 @@ public:
 
 	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
 	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
+	bool IsOnScreen(glm::vec2 screenPos, glm::vec2 screenSize) { return hBox.Intersects(screenPos, screenSize); }
 	
+	// end
+	void DeleteObject() { this->deleted = true; }
 	bool IsDeleted() { return deleted; }
+
+	virtual ~GameObject() {}
 
 protected:
 

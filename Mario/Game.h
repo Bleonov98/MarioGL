@@ -7,6 +7,8 @@
 #include "TextRenderer.h"
 #include "ResourceManager.h"
 #include "GameObject.h"
+#include "DynamicObject.h"
+#include "Brick.h"
 
 enum GameState {
 	MENU,
@@ -46,6 +48,7 @@ public:
 	void InitLevelObjects();
 	void InitSolidObjects();
 	void InitTubes();
+	void InitBricks();
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
@@ -57,10 +60,14 @@ private:
 	glm::mat4 projection, view = glm::mat4(1.0f);
 	Camera camera;
 
-	std::vector<GameObject*> staticObj;
 	std::vector<GameObject*> objList;
 
+	std::vector<DynamicObject*> animatedObj;
+	std::vector<Brick*> bricks;
+
+
 	int width, height;
+	float animationTime = 0.0f;
 	bool toggle = false;
 	glm::vec2 cursorPos;
 

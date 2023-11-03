@@ -25,6 +25,11 @@ public:
             min.y <= other.max.y && max.y >= other.min.y);
     }
 
+    bool Intersects(const glm::vec2 otherPos, const glm::vec2 otherSize) const {
+        return (min.x <= otherPos.x + otherSize.x && max.x >= otherPos.x &&
+            min.y <= otherPos.y + otherSize.y && max.y >= otherPos.y);
+    }
+
     bool IntersectPoint(const glm::vec2 point) const {
         return (min.x <= point.x && max.x >= point.x &&
                 min.y <= point.y && max.y >= point.y);

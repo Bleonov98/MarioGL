@@ -18,6 +18,8 @@ public:
 
 	float GetSpeed() { return speed; }
 
+	virtual ~DynamicObject() {}
+
 protected:
 
 	float speed;

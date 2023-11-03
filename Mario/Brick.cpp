@@ -4,7 +4,7 @@ void Brick::PlayAnimation()
 {
 	SetTexture(ResourceManager::GetTexture("solid_" + std::to_string(frame)));
 
-	if (frame < 3) frame++;
+	if (frame < 2) frame++;
 	else frame = 0;
 }
 
@@ -23,7 +23,14 @@ void Brick::Push(bool destroy)
 {
 	if (type == COMMON && !destroy) isMoving = true;
 	else if (type == COMMON && destroy) {
-		SetTexture(ResourceManager::GetTexture("destroyed"));
+		if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("destroyed_brick_under"));
+		else SetTexture(ResourceManager::GetTexture("destroyed_brick"));
 		DeleteObject();
+	}
+	else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+	else if (type == MONEY) {
+		isMoving = true;
+		if (coins > 0) coins--;
+		else SetTexture(ResourceManager::GetTexture("destroyed_solid"));
 	}
 }
