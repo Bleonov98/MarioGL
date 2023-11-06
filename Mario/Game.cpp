@@ -22,12 +22,25 @@ void Game::Init()
 
        // - bricks
     ResourceManager::LoadTexture("../textures/brick/brick.png", false, "brick");
+    ResourceManager::LoadTexture("../textures/brick/underbrick.png", false, "underbrick");
+
     ResourceManager::LoadTexture("../textures/brick/destroyed.png", true, "destroyed_brick");
+    ResourceManager::LoadTexture("../textures/brick/destroyed_underbrick.png", true, "destroyed_underbrick");
     ResourceManager::LoadTexture("../textures/brick/destroyed_solid.png", true, "destroyed_solid");
+
     ResourceManager::LoadTexture("../textures/brick/solid_0.png", true, "solid_0");
     ResourceManager::LoadTexture("../textures/brick/solid_1.png", true, "solid_1");
     ResourceManager::LoadTexture("../textures/brick/solid_2.png", true, "solid_2");
+        // - coins
+    ResourceManager::LoadTexture("../textures/coin/coin_0", true, "coin_0");
+    ResourceManager::LoadTexture("../textures/coin/coin_1", true, "coin_1");
+    ResourceManager::LoadTexture("../textures/coin/coin_2", true, "coin_2");
 
+    ResourceManager::LoadTexture("../textures/coin/flip_coin_0", true, "flip_coin_0");
+    ResourceManager::LoadTexture("../textures/coin/flip_coin_1", true, "flip_coin_1");
+    ResourceManager::LoadTexture("../textures/coin/flip_coin_2", true, "flip_coin_2");
+
+    // sound resources
     music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
     music = sound->addSoundSourceFromFile("../sounds/overworld.mp3");
     music->setDefaultVolume(0.5f);
@@ -64,8 +77,8 @@ void Game::Menu()
 void Game::ProcessInput(float dt)
 {
     if (gmState == ACTIVE) {
-        if (this->Keys[GLFW_KEY_RIGHT] && camera.cameraPos.x < 19530.0f && !toggle) camera.cameraPos.x += 1.0f;
-        if (this->Keys[GLFW_KEY_LEFT] && camera.cameraPos.x > 0.0f) camera.cameraPos.x -= 1.0f;
+        if (this->Keys[GLFW_KEY_RIGHT] && camera.cameraPos.x < 19530.0f && !toggle) camera.cameraPos.x += 1500.0f * dt;
+        if (this->Keys[GLFW_KEY_LEFT] && camera.cameraPos.x > 0.0f) camera.cameraPos.x -= 1500.0f * dt;
         if (this->Keys[GLFW_KEY_SPACE]) gmState = PAUSED;
         if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
             
@@ -119,7 +132,7 @@ void Game::Update(float dt)
     if (gmState == ACTIVE) {
 
         // actions
-        if (animationTime >= 0.5f) {
+        if (animationTime >= 0.4f) {
             for (auto i : animatedObj)
             {
                 if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)))i->PlayAnimation();
@@ -145,10 +158,16 @@ void Game::Render()
     DrawStats();
 
     int onScreen = 0;
+    
     // objects
     for (auto i : bricks)
     {
         if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i), onScreen++;
+    }
+    
+    for (auto i : coins)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i), onScreen++;
     }
 
     text->RenderText("draw: " + std::to_string(onScreen), glm::vec2(this->width - 180.0f, 150.0f), 1.0f, glm::vec3(1.0f));
@@ -447,12 +466,28 @@ void Game::InitBricks()
     }
 
     // underworld
-    for (size_t i = 0; i < 5; i++)
+    for (size_t i = 0; i < 7; i++)
     {
-        brick = new Brick(glm::vec2(500.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type);
+        brick = new Brick(glm::vec2(398.0f + 102.0f * i, this->height + 121.0f), glm::vec2(102.0f, 65.0f), COMMON);
         bricks.push_back(brick);
         objList.push_back(brick);
     }
+}
+
+void Game::InitCoins()
+{
+    Coin* coin;
+    
+    for (size_t i = 0; i < 6; ++i)
+    {
+        for (size_t j = 0; j < 6; ++j)
+        {
+            if (i == 0 && (j == 0 || j == 5)) continue;
+
+            coin = new Coin(glm::vec2(420.0f + 50 * i, this->height + 325.0f * j), glm::vec2());
+        }
+    }
+   
 }
 
 Game::~Game()

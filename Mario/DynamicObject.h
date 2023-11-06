@@ -24,6 +24,7 @@ protected:
 
 	float speed;
 	int frame = 0;
+	bool animToggle = false;
 
 };
 

@@ -10,17 +10,29 @@ enum BrickType {
 	MONEY
 };
 
+enum BrickBonus {
+	NONE,
+	COIN,
+	UPGRADE,
+	LIFE,
+	STAR
+};
+
 class Brick : public DynamicObject
 {
 public:
 
-	Brick(glm::vec2 position, glm::vec2 size, BrickType type = COMMON, float speed = 100.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, speed, angle, color) {
-		this->type = type, startPos = position;
+	Brick(glm::vec2 position, glm::vec2 size, BrickType type = COMMON, BrickBonus bonus = NONE, float speed = 100.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, speed, angle, color) {
+		this->type = type, this->bonus = bonus, startPos = position;
 
-		if (type == COMMON || type == MONEY) SetTexture(ResourceManager::GetTexture("brick"));
-		else if ((type == COMMON || type == MONEY) && position.y > 900.0f) SetTexture(ResourceManager::GetTexture("underbrick"));
+		if (type == COMMON || type == MONEY) {
+			if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("underbrick"));
+			else SetTexture(ResourceManager::GetTexture("brick"));
+		}
 		else if (type == SOLID) SetTexture(ResourceManager::GetTexture("solid_0"));
 		else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("test"));
+
+		if (type == MONEY) bonus = COIN;
 	};
 
 	void PlayAnimation() override;
@@ -30,6 +42,7 @@ public:
 	void Push(bool destroy);
 
 	BrickType GetType() { return this->type; }
+	BrickBonus GetBonusType() { return this->bonus; }
 	bool IsMove() { return isMoving; }
 
 	virtual ~Brick() {}
@@ -37,6 +50,8 @@ public:
 private:
 
 	BrickType type;
+	BrickBonus bonus;
+
 	bool isMoving = false, reached = false;
 	int coins = 10;
 	glm::vec2 startPos;

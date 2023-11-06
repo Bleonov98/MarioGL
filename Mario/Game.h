@@ -6,9 +6,11 @@
 
 #include "TextRenderer.h"
 #include "ResourceManager.h"
+
 #include "GameObject.h"
 #include "DynamicObject.h"
 #include "Brick.h"
+#include "Coin.h"
 
 enum GameState {
 	MENU,
@@ -49,6 +51,7 @@ public:
 	void InitSolidObjects();
 	void InitTubes();
 	void InitBricks();
+	void InitCoins();
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
@@ -64,6 +67,7 @@ private:
 
 	std::vector<DynamicObject*> animatedObj;
 	std::vector<Brick*> bricks;
+	std::vector<Coin*> coins;
 
 
 	int width, height;

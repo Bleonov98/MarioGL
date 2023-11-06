@@ -4,8 +4,10 @@ void Brick::PlayAnimation()
 {
 	SetTexture(ResourceManager::GetTexture("solid_" + std::to_string(frame)));
 
-	if (frame < 2) frame++;
-	else frame = 0;
+	if (animToggle) frame--;
+	else frame++;
+
+	if (frame == 0 || frame == 2) animToggle = !animToggle;
 }
 
 void Brick::Move(float dt)
@@ -21,9 +23,9 @@ void Brick::Move(float dt)
 
 void Brick::Push(bool destroy)
 {
-	if (type == COMMON && !destroy) isMoving = true;
+	if (type == COMMON && !destroy) isMoving = true; 
 	else if (type == COMMON && destroy) {
-		if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("destroyed_brick_under"));
+		if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("destroyed_underbrick"));
 		else SetTexture(ResourceManager::GetTexture("destroyed_brick"));
 		DeleteObject();
 	}

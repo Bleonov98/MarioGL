@@ -31,6 +31,7 @@
     <ClCompile Include="Brick.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Coin.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -63,6 +64,7 @@
     <ClInclude Include="Brick.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Coin.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
