@@ -29,7 +29,6 @@ public:
 			if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("underbrick"));
 			else SetTexture(ResourceManager::GetTexture("brick"));
 		}
-		else if (type == SOLID) SetTexture(ResourceManager::GetTexture("solid_0"));
 		else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("test"));
 
 		if (type == MONEY) bonus = COIN;
@@ -37,7 +36,7 @@ public:
 
 	void PlayAnimation() override;
 
-	void Move(float dt) override;
+	void Move(float dt);
 
 	void Push(bool destroy);
 

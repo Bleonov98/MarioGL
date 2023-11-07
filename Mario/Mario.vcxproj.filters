@@ -7,9 +7,6 @@
     <ClCompile Include="Game.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="..\libraries\Include\glad\glad.c">
-      <Filter>source</Filter>
-    </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>source</Filter>
     </ClCompile>
@@ -31,7 +28,15 @@
     <ClCompile Include="Brick.cpp">
       <Filter>source</Filter>
     </ClCompile>
-    <ClCompile Include="Coin.cpp" />
+    <ClCompile Include="Coin.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="Mario.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libraries\Include\glad\glad.c">
+      <Filter>source\shaders, tools</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -64,20 +69,28 @@
     <ClInclude Include="Brick.h">
       <Filter>headers</Filter>
     </ClInclude>
-    <ClInclude Include="Coin.h" />
+    <ClInclude Include="Coin.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Person.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Mario.h">
+      <Filter>headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
-      <Filter>source</Filter>
+      <Filter>source\shaders, tools</Filter>
     </None>
     <None Include="..\shaders\fTxtShader.ft">
-      <Filter>source</Filter>
+      <Filter>source\shaders, tools</Filter>
     </None>
     <None Include="..\shaders\vShader.vx">
-      <Filter>source</Filter>
+      <Filter>source\shaders, tools</Filter>
     </None>
     <None Include="..\shaders\vTxtShader.vx">
-      <Filter>source</Filter>
+      <Filter>source\shaders, tools</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -86,6 +99,9 @@
     </Filter>
     <Filter Include="headers">
       <UniqueIdentifier>{0a2ace80-1861-44f0-bfbc-9cab24baba6e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="source\shaders, tools">
+      <UniqueIdentifier>{f8d9b67c-bc92-43d4-b2eb-845028db9ee0}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

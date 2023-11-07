@@ -9,6 +9,7 @@ ISoundEngine* sound = irrklang::createIrrKlangDevice();
 ISoundSource* music;
 
 GameObject* map;
+Mario* player;
 
 void Game::Init()
 {
@@ -16,29 +17,41 @@ void Game::Init()
     ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
 
        // - map 
-    ResourceManager::LoadTexture("../textures/map/MarioMap.png", true, "MainMap");
-    ResourceManager::LoadTexture("../textures/map/Underground.png", true, "UndergroundMap");
-    ResourceManager::LoadTexture("../textures/test.png", false, "test");
+    ResourceManager::LoadTexture("map/MarioMap.png", true, "MainMap");
+    ResourceManager::LoadTexture("map/Underground.png", true, "UndergroundMap");
+    ResourceManager::LoadTexture("test.png", false, "test");
 
        // - bricks
-    ResourceManager::LoadTexture("../textures/brick/brick.png", false, "brick");
-    ResourceManager::LoadTexture("../textures/brick/underbrick.png", false, "underbrick");
+    ResourceManager::LoadTexture("brick/brick.png", false, "brick");
+    ResourceManager::LoadTexture("brick/underbrick.png", false, "underbrick");
 
-    ResourceManager::LoadTexture("../textures/brick/destroyed.png", true, "destroyed_brick");
-    ResourceManager::LoadTexture("../textures/brick/destroyed_underbrick.png", true, "destroyed_underbrick");
-    ResourceManager::LoadTexture("../textures/brick/destroyed_solid.png", true, "destroyed_solid");
+    ResourceManager::LoadTexture("brick/destroyed.png", true, "destroyed_brick");
+    ResourceManager::LoadTexture("brick/destroyed_underbrick.png", true, "destroyed_underbrick");
+    ResourceManager::LoadTexture("brick/destroyed_solid.png", true, "destroyed_solid");
 
-    ResourceManager::LoadTexture("../textures/brick/solid_0.png", true, "solid_0");
-    ResourceManager::LoadTexture("../textures/brick/solid_1.png", true, "solid_1");
-    ResourceManager::LoadTexture("../textures/brick/solid_2.png", true, "solid_2");
+    ResourceManager::LoadTexture("brick/solid_0.png", true, "solid_0");
+    ResourceManager::LoadTexture("brick/solid_1.png", true, "solid_1");
+    ResourceManager::LoadTexture("brick/solid_2.png", true, "solid_2");
         // - coins
-    ResourceManager::LoadTexture("../textures/coin/coin_0", true, "coin_0");
-    ResourceManager::LoadTexture("../textures/coin/coin_1", true, "coin_1");
-    ResourceManager::LoadTexture("../textures/coin/coin_2", true, "coin_2");
+    ResourceManager::LoadTexture("coin/coin_0.png", true, "coin_0");
+    ResourceManager::LoadTexture("coin/coin_1.png", true, "coin_1");
+    ResourceManager::LoadTexture("coin/coin_2.png", true, "coin_2");
 
-    ResourceManager::LoadTexture("../textures/coin/flip_coin_0", true, "flip_coin_0");
-    ResourceManager::LoadTexture("../textures/coin/flip_coin_1", true, "flip_coin_1");
-    ResourceManager::LoadTexture("../textures/coin/flip_coin_2", true, "flip_coin_2");
+    ResourceManager::LoadTexture("coin/flip_coin_0.png", true, "flip_coin_0");
+    ResourceManager::LoadTexture("coin/flip_coin_1.png", true, "flip_coin_1");
+    ResourceManager::LoadTexture("coin/flip_coin_2.png", true, "flip_coin_2");
+        // - mario
+    ResourceManager::LoadTexture("mario/mario_left_stand.png", true, "mario_left_stand");
+    ResourceManager::LoadTexture("mario/mario_right_stand.png", true, "mario_right_stand");
+
+    ResourceManager::LoadTexture("mario/mario_left_0.png", true, "mario_left_0");
+    ResourceManager::LoadTexture("mario/mario_left_1.png", true, "mario_left_1");
+    ResourceManager::LoadTexture("mario/mario_left_2.png", true, "mario_left_2");
+
+    ResourceManager::LoadTexture("mario/mario_right_0.png", true, "mario_right_0");
+    ResourceManager::LoadTexture("mario/mario_right_1.png", true, "mario_right_1");
+    ResourceManager::LoadTexture("mario/mario_right_2.png", true, "mario_right_2");
+        // - smth
 
     // sound resources
     music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
@@ -59,26 +72,23 @@ void Game::Init()
     // background/map
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
+    // 
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(60.0f), 1000.0f);
+    player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
+    moveableObj.push_back(player);
 
     // game objects
     InitLevelObjects();
 }
 
-void Game::Menu()
-{
-    text->RenderText("MENU", glm::vec2(this->width / 2.0f - 65.0f, this->height / 2.0f - 116.0f), 1.75f, glm::vec3(0.75f));
-
-    text->RenderText("Start", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f), 1.0f, glm::vec3(1.0f));
-    text->RenderText("Exit", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f + 40.0f), 1.0f, glm::vec3(1.0f));
-
-    text->RenderText("->", glm::vec2(cursorPos), 1.0f, glm::vec3(1.0f));
-} 
-
+// Actions
 void Game::ProcessInput(float dt)
 {
     if (gmState == ACTIVE) {
-        if (this->Keys[GLFW_KEY_RIGHT] && camera.cameraPos.x < 19530.0f && !toggle) camera.cameraPos.x += 1500.0f * dt;
-        if (this->Keys[GLFW_KEY_LEFT] && camera.cameraPos.x > 0.0f) camera.cameraPos.x -= 1500.0f * dt;
+        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT);
+        else if (this->Keys[GLFW_KEY_LEFT]) player->Move(dt, MOVELEFT);
+        else player->Move(dt, STAND);
+
         if (this->Keys[GLFW_KEY_SPACE]) gmState = PAUSED;
         if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
             
@@ -135,13 +145,13 @@ void Game::Update(float dt)
         if (animationTime >= 0.4f) {
             for (auto i : animatedObj)
             {
-                if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)))i->PlayAnimation();
+                if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
             }
             animationTime = 0.0f;
         }
 
         // update borders after position changes
-        for (auto i : bricks)
+        for (auto i : moveableObj)
         {
             i->UpdateAABB();
         }
@@ -150,27 +160,25 @@ void Game::Update(float dt)
     }
 }
 
+// Render
 void Game::Render()
 {
     // background/map/stats
     DrawObject(map);
-
     DrawStats();
-
-    int onScreen = 0;
     
     // objects
     for (auto i : bricks)
     {
-        if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i), onScreen++;
+        if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
     
     for (auto i : coins)
     {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i), onScreen++;
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
 
-    text->RenderText("draw: " + std::to_string(onScreen), glm::vec2(this->width - 180.0f, 150.0f), 1.0f, glm::vec3(1.0f));
+    DrawObject(player);
 
     if (gmState != ACTIVE) Menu();
 }
@@ -220,11 +228,23 @@ void Game::DrawStats()
     text->RenderText(std::to_string(camera.cameraPos.x), glm::vec2(this->width - 180.0f, 100.0f), 1.0f, color);
 }
 
+void Game::Menu()
+{
+    text->RenderText("MENU", glm::vec2(this->width / 2.0f - 65.0f, this->height / 2.0f - 116.0f), 1.75f, glm::vec3(0.75f));
+
+    text->RenderText("Start", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f), 1.0f, glm::vec3(1.0f));
+    text->RenderText("Exit", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f + 40.0f), 1.0f, glm::vec3(1.0f));
+
+    text->RenderText("->", glm::vec2(cursorPos), 1.0f, glm::vec3(1.0f));
+}
+
+// Level  
 void Game::InitLevelObjects()
 {
     InitSolidObjects();
     InitTubes();
     InitBricks();
+    InitCoins();
 }
 
 void Game::InitSolidObjects()
@@ -477,18 +497,23 @@ void Game::InitBricks()
 void Game::InitCoins()
 {
     Coin* coin;
-    
-    for (size_t i = 0; i < 6; ++i)
-    {
-        for (size_t j = 0; j < 6; ++j)
-        {
-            if (i == 0 && (j == 0 || j == 5)) continue;
 
-            coin = new Coin(glm::vec2(420.0f + 50 * i, this->height + 325.0f * j), glm::vec2());
+    for (size_t i = 0; i < 3; ++i)
+    {
+        for (size_t j = 0; j < 7; ++j)
+        {
+            if (i == 0 && (j == 0 || j == 6)) continue;
+
+            coin = new Coin(glm::vec2(415.0f + 100.0f * j, this->height + 325.0f + 130.0f * i), glm::vec2(60.0f, 60.0f));
+            objList.push_back(coin);
+            animatedObj.push_back(coin);
+            coins.push_back(coin);
         }
     }
    
 }
+// - - - - - - - - - - - - - - -
+
 
 Game::~Game()
 {
@@ -496,8 +521,10 @@ Game::~Game()
     delete text;
     delete sound;
 
-    // objects
     delete map;
+
+    // objects
+    delete player;
 
     // lists
     for (size_t i = 0; i < objList.size(); ++i)
@@ -506,7 +533,9 @@ Game::~Game()
     }
     objList.clear();
     animatedObj.clear();
+    moveableObj.clear();
 
     bricks.clear();
+    coins.clear();
     // ---------
 }

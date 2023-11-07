@@ -11,6 +11,7 @@
 #include "DynamicObject.h"
 #include "Brick.h"
 #include "Coin.h"
+#include "Mario.h"
 
 enum GameState {
 	MENU,
@@ -68,6 +69,8 @@ private:
 	std::vector<DynamicObject*> animatedObj;
 	std::vector<Brick*> bricks;
 	std::vector<Coin*> coins;
+
+	std::vector<DynamicObject*> moveableObj;
 
 
 	int width, height;

@@ -1,4 +1,6 @@
-#pragma once
+#ifndef COIN_H
+#define COIN_H
+
 #include "DynamicObject.h"
 class Coin : public DynamicObject
 {
@@ -11,7 +13,7 @@ public:
 
 	void FlipAnimation();
 
-	void Move(float dt) override;
+	void Move(float dt);
 
 	virtual ~Coin() {}
 
@@ -21,3 +23,4 @@ private:
 	glm::vec2 startPos;
 };
 
+#endif // !COIN_H

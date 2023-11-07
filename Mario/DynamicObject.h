@@ -14,8 +14,6 @@ public:
 
 	virtual void PlayAnimation() = 0;
 
-	virtual void Move(float dt) = 0;
-
 	float GetSpeed() { return speed; }
 
 	virtual ~DynamicObject() {}
