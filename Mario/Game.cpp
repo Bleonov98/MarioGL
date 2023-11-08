@@ -11,47 +11,10 @@ ISoundSource* music;
 GameObject* map;
 Mario* player;
 
+ // Loading
 void Game::Init()
 {
-    // resources
-    ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
-
-       // - map 
-    ResourceManager::LoadTexture("map/MarioMap.png", true, "MainMap");
-    ResourceManager::LoadTexture("map/Underground.png", true, "UndergroundMap");
-    ResourceManager::LoadTexture("test.png", false, "test");
-
-       // - bricks
-    ResourceManager::LoadTexture("brick/brick.png", false, "brick");
-    ResourceManager::LoadTexture("brick/underbrick.png", false, "underbrick");
-
-    ResourceManager::LoadTexture("brick/destroyed.png", true, "destroyed_brick");
-    ResourceManager::LoadTexture("brick/destroyed_underbrick.png", true, "destroyed_underbrick");
-    ResourceManager::LoadTexture("brick/destroyed_solid.png", true, "destroyed_solid");
-
-    ResourceManager::LoadTexture("brick/solid_0.png", true, "solid_0");
-    ResourceManager::LoadTexture("brick/solid_1.png", true, "solid_1");
-    ResourceManager::LoadTexture("brick/solid_2.png", true, "solid_2");
-        // - coins
-    ResourceManager::LoadTexture("coin/coin_0.png", true, "coin_0");
-    ResourceManager::LoadTexture("coin/coin_1.png", true, "coin_1");
-    ResourceManager::LoadTexture("coin/coin_2.png", true, "coin_2");
-
-    ResourceManager::LoadTexture("coin/flip_coin_0.png", true, "flip_coin_0");
-    ResourceManager::LoadTexture("coin/flip_coin_1.png", true, "flip_coin_1");
-    ResourceManager::LoadTexture("coin/flip_coin_2.png", true, "flip_coin_2");
-        // - mario
-    ResourceManager::LoadTexture("mario/mario_left_stand.png", true, "mario_left_stand");
-    ResourceManager::LoadTexture("mario/mario_right_stand.png", true, "mario_right_stand");
-
-    ResourceManager::LoadTexture("mario/mario_left_0.png", true, "mario_left_0");
-    ResourceManager::LoadTexture("mario/mario_left_1.png", true, "mario_left_1");
-    ResourceManager::LoadTexture("mario/mario_left_2.png", true, "mario_left_2");
-
-    ResourceManager::LoadTexture("mario/mario_right_0.png", true, "mario_right_0");
-    ResourceManager::LoadTexture("mario/mario_right_1.png", true, "mario_right_1");
-    ResourceManager::LoadTexture("mario/mario_right_2.png", true, "mario_right_2");
-        // - smth
+    LoadResources();
 
     // sound resources
     music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
@@ -73,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(60.0f), 1000.0f);
+    player = new Mario(glm::vec2(100.0f, this->height - 200.0f), glm::vec2(60.0f), 500.0f);
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -81,15 +44,109 @@ void Game::Init()
     InitLevelObjects();
 }
 
+void Game::LoadResources()
+{
+    // shaders
+    ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
+
+    // - map 
+    ResourceManager::LoadTexture("map/MarioMap.png", true, "MainMap");
+    ResourceManager::LoadTexture("map/Underground.png", true, "UndergroundMap");
+    ResourceManager::LoadTexture("test.png", false, "test");
+
+    // - bricks
+    ResourceManager::LoadTexture("brick/brick.png", false, "brick");
+    ResourceManager::LoadTexture("brick/underbrick.png", false, "underbrick");
+
+    ResourceManager::LoadTexture("brick/destroyed.png", true, "destroyed_brick");
+    ResourceManager::LoadTexture("brick/destroyed_underbrick.png", true, "destroyed_underbrick");
+    ResourceManager::LoadTexture("brick/destroyed_solid.png", true, "destroyed_solid");
+
+    ResourceManager::LoadTexture("brick/solid_0.png", true, "solid_0");
+    ResourceManager::LoadTexture("brick/solid_1.png", true, "solid_1");
+    ResourceManager::LoadTexture("brick/solid_2.png", true, "solid_2");
+    // - coins
+    ResourceManager::LoadTexture("coin/coin_0.png", true, "coin_0");
+    ResourceManager::LoadTexture("coin/coin_1.png", true, "coin_1");
+    ResourceManager::LoadTexture("coin/coin_2.png", true, "coin_2");
+
+    ResourceManager::LoadTexture("coin/flip_coin_0.png", true, "flip_coin_0");
+    ResourceManager::LoadTexture("coin/flip_coin_1.png", true, "flip_coin_1");
+    ResourceManager::LoadTexture("coin/flip_coin_2.png", true, "flip_coin_2");
+    // - mario
+        // - lil Mario
+    ResourceManager::LoadTexture("mario/lil/mario_left_stand.png", true, "mario_left_stand");
+    ResourceManager::LoadTexture("mario/lil/mario_right_stand.png", true, "mario_right_stand");
+                                        
+    ResourceManager::LoadTexture("mario/lil/mario_left_0.png", true, "mario_left_0");
+    ResourceManager::LoadTexture("mario/lil/mario_left_1.png", true, "mario_left_1");
+    ResourceManager::LoadTexture("mario/lil/mario_left_2.png", true, "mario_left_2");
+                                        
+    ResourceManager::LoadTexture("mario/lil/mario_right_0.png", true, "mario_right_0");
+    ResourceManager::LoadTexture("mario/lil/mario_right_1.png", true, "mario_right_1");
+    ResourceManager::LoadTexture("mario/lil/mario_right_2.png", true, "mario_right_2");
+
+    ResourceManager::LoadTexture("mario/lil/mario_left_jump.png", true, "mario_left_jump");
+    ResourceManager::LoadTexture("mario/lil/mario_right_jump.png", true, "mario_right_jump");
+        // - big Mario
+    ResourceManager::LoadTexture("mario/big/big_left_stand.png", true, "big_left_stand");
+    ResourceManager::LoadTexture("mario/big/big_right_stand.png", true, "big_right_stand");
+
+    ResourceManager::LoadTexture("mario/big/big_left_duck.png", true, "big_left_duck");
+    ResourceManager::LoadTexture("mario/big/big_right_duck.png", true, "big_right_duck");
+
+    ResourceManager::LoadTexture("mario/big/big_left_jump.png", true, "big_left_jump");
+    ResourceManager::LoadTexture("mario/big/big_right_jump.png", true, "big_right_jump");
+
+    ResourceManager::LoadTexture("mario/big/big_left_0.png", true, "big_left_0");
+    ResourceManager::LoadTexture("mario/big/big_left_1.png", true, "big_left_1");
+    ResourceManager::LoadTexture("mario/big/big_left_2.png", true, "big_left_2");
+                                        
+    ResourceManager::LoadTexture("mario/big/big_right_0.png", true, "big_right_0");
+    ResourceManager::LoadTexture("mario/big/big_right_1.png", true, "big_right_1");
+    ResourceManager::LoadTexture("mario/big/big_right_2.png", true, "big_right_2");
+        // - chief Mario
+    ResourceManager::LoadTexture("mario/chief/chief_left_stand.png", true, "chief_left_stand");
+    ResourceManager::LoadTexture("mario/chief/chief_right_stand.png", true, "chief_right_stand");
+                                        
+    ResourceManager::LoadTexture("mario/chief/chief_left_duck.png", true, "chief_left_duck");
+    ResourceManager::LoadTexture("mario/chief/chief_right_duck.png", true, "chief_right_duck");
+                                        
+    ResourceManager::LoadTexture("mario/chief/chief_left_jump.png", true, "chief_left_jump");
+    ResourceManager::LoadTexture("mario/chief/chief_right_jump.png", true, "chief_right_jump");
+                                        
+    ResourceManager::LoadTexture("mario/chief/chief_left_0.png", true, "chief_left_0");
+    ResourceManager::LoadTexture("mario/chief/chief_left_1.png", true, "chief_left_1");
+    ResourceManager::LoadTexture("mario/chief/chief_left_2.png", true, "chief_left_2");
+                                        
+    ResourceManager::LoadTexture("mario/chief/chief_right_0.png", true, "chief_right_0");
+    ResourceManager::LoadTexture("mario/chief/chief_right_1.png", true, "chief_right_1");
+    ResourceManager::LoadTexture("mario/chief/chief_right_2.png", true, "chief_right_2");
+
+    // - smth
+}
+
 // Actions
 void Game::ProcessInput(float dt)
 {
     if (gmState == ACTIVE) {
-        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT);
-        else if (this->Keys[GLFW_KEY_LEFT]) player->Move(dt, MOVELEFT);
+
+        // player movement
+        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT); 
+        else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Move(dt, MOVELEFT);
+        else if (this->Keys[GLFW_KEY_SPACE] /* && onGround */) player->Move(dt, MOVELEFT);
         else player->Move(dt, STAND);
 
+        // collision
+        if (player->GetPos().x < camera.cameraPos.x) player->SetPos(glm::vec2(camera.cameraPos.x, player->GetPos().y));
+        
+        // move screen
+        float midScreenX = camera.cameraPos.x + this->width / 2.0f;
+        if (player->GetPos().x > midScreenX) camera.cameraPos.x += player->GetPos().x - midScreenX;
+
         if (this->Keys[GLFW_KEY_SPACE]) gmState = PAUSED;
+        
+        // Temp - - - - - - - - - - - - - - - - -
         if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
             
             toggle = !toggle;
@@ -120,7 +177,7 @@ void Game::ProcessInput(float dt)
             sound->play2D(music, true);
         }
     }
-    else {
+    else { // - - - - - - - - MENU OR PAUSE
         if (this->Keys[GLFW_KEY_UP] && !this->KeysProcessed[GLFW_KEY_UP] && cursorPos.y > this->height / 2.0f) {
             cursorPos.y -= 40.0f;
             this->KeysProcessed[GLFW_KEY_UP] = true;
@@ -138,16 +195,17 @@ void Game::ProcessInput(float dt)
 
 void Game::Update(float dt)
 {
-    animationTime += dt;
     if (gmState == ACTIVE) {
 
         // actions
-        if (animationTime >= 0.4f) {
-            for (auto i : animatedObj)
-            {
-                if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
-            }
-            animationTime = 0.0f;
+        for (auto i : moveableObj)
+        {
+            i->GroundCollision()
+        }
+
+        for (auto i : animatedObj)
+        {
+            if (i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
         }
 
         // update borders after position changes

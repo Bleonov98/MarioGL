@@ -1,27 +1,46 @@
 #include "Mario.h"
 
-void Mario::Move(float dt, MarioDirection direction)
+void Mario::Move(float dt, MarioAction direction)
 {
 	if (lastDir != direction) restartAnim = true;
 	else restartAnim = false;
 
 	if (direction == STAND) {
-		if (lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture("mario_right_stand"));
-		else if (lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture("mario_left_stand"));
+		if (lastDir == MOVERIGHT) {
+			SetTexture(ResourceManager::GetTexture("mario_right_stand"));
+			position.x += inertia * dt;
+		}
+		else if (lastDir == MOVELEFT) {
+			SetTexture(ResourceManager::GetTexture("mario_left_stand"));
+			position.x -= inertia * dt;
+		}
+
+		if (inertia > 0.0f) {
+			inertia -= 1.0f;
+			if (inertia < 0.0f) inertia = 0.0f;
+		}
 	}
 	else if (direction == MOVELEFT) {
+		if (inertia < 600.0f) inertia += 1.0f;
 		position.x -= speed * dt;
+
 		lastDir = direction;
 	}
 	else if (direction == MOVERIGHT) {
+		if (inertia < 600.0f) inertia += 1.0f;
 		position.x += speed * dt;
+
 		lastDir = direction;
 	}
 	else if (direction == DUCK && type == BIG) {
 		// texture duck and -size, last direction
 	}
 
-	PlayAnimation();
+	animationTime += dt;
+	if (animationTime >= 0.1f) {
+		PlayAnimation();
+		animationTime = 0.0f;
+	}
 }
 
 void Mario::PlayAnimation()

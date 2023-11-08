@@ -46,6 +46,9 @@ public:
 	void DrawStats();
 
 	//void Restart();
+	
+	// resources
+	void LoadResources();
 
 	// level
 	void InitLevelObjects();
@@ -74,7 +77,6 @@ private:
 
 
 	int width, height;
-	float animationTime = 0.0f;
 	bool toggle = false;
 	glm::vec2 cursorPos;
 

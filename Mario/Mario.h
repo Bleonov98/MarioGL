@@ -3,11 +3,12 @@
 
 #include "Person.h"
 
-enum MarioDirection {
+enum MarioAction {
 	STAND,
 	MOVELEFT,
 	MOVERIGHT,
-	DUCK
+	DUCK,
+	JUMP
 };
 
 enum MarioType {
@@ -22,7 +23,7 @@ public:
 
 	Mario(glm::vec2 position, glm::vec2 size, float speed, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : Person(position, size, speed, angle, color) {};
 
-	void Move(float dt, MarioDirection direction);
+	void Move(float dt, MarioAction direction);
 	void Jump(float dt);
 	void Fire();
 
@@ -35,7 +36,9 @@ public:
 private:
 
 	MarioType type = LITTLE;
-	MarioDirection lastDir = MOVERIGHT;
+	MarioAction lastDir = MOVERIGHT;
+
+	float inertia = 0.0f;
 
 	bool restartAnim = false;
 };
