@@ -37,7 +37,9 @@
     <ClCompile Include="..\libraries\Include\glad\glad.c">
       <Filter>source\shaders, tools</Filter>
     </ClCompile>
-    <ClCompile Include="DynamicObject.cpp" />
+    <ClCompile Include="DynamicObject.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">

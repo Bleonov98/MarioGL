@@ -35,8 +35,10 @@ public:
                 min.y <= point.y && max.y >= point.y);
     }
 
-    bool IntersectSide(const spriteSide side, const spriteSide otherSide) const {
-        return (side.first.x);
+    bool IntersectGround(const spriteSide other) {
+        spriteSide side = GetSide(BOTTOM);
+        return (side.first.x <= other.second.x && side.second.x >= other.first.x &&
+                (side.first.y >= other.first.y && side.second.y >= other.second.y));
     }
 
     void SetBorder(const glm::vec2& newMin, const glm::vec2& newMax) {

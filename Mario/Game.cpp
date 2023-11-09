@@ -36,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 200.0f), glm::vec2(60.0f), 500.0f);
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 500.0f, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -132,9 +132,10 @@ void Game::ProcessInput(float dt)
     if (gmState == ACTIVE) {
 
         // player movement
-        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT); 
+        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT);
         else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Move(dt, MOVELEFT);
-        else if (this->Keys[GLFW_KEY_SPACE] /* && onGround */) player->Move(dt, MOVELEFT);
+        else if (this->Keys[GLFW_KEY_SPACE] && player->IsOnGround()) player->Jump(dt);
+        else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround() /* -> CHANGE */) player->Move(dt, DUCK);
         else player->Move(dt, STAND);
 
         // collision
@@ -200,7 +201,18 @@ void Game::Update(float dt)
         // actions
         for (auto i : moveableObj)
         {
-            i->GroundCollision()
+            for (auto j : grounds)
+            {
+                i->Drop(dt, i->GroundCollision(*j));
+            }
+            for (auto j : tubes)
+            {
+                i->Drop(dt, i->GroundCollision(*j));
+            }
+            for (auto j : bricks)
+            {
+                i->Drop(dt, i->GroundCollision(*j));  // -> change (goes multiple times)
+            }
         }
 
         for (auto i : animatedObj)
@@ -311,18 +323,22 @@ void Game::InitSolidObjects()
     GameObject* ground = new GameObject(glm::vec2(0.0f, this->height - 115.0f), glm::vec2(6935.0f, 100.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(7130.0f, this->height - 115.0f), glm::vec2(1512.0f, 100.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(8942.0f, this->height - 115.0f), glm::vec2(6430.0f, 100.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(15572.0f, this->height - 115.0f), glm::vec2(5500.0f, 100.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     GameObject* brick;
     int st = 0;
@@ -334,6 +350,7 @@ void Game::InitSolidObjects()
             brick = new GameObject(glm::vec2(13465.0f + (100 * j), this->height - 180.0f - 65 * i), glm::vec2(100.0f, 65.0f), 0.0f, glm::vec3(1.0f));
             brick->SetTexture(ResourceManager::GetTexture("test"));
             objList.push_back(brick);
+            grounds.push_back(brick);
         }
         st++;
     }
@@ -346,6 +363,7 @@ void Game::InitSolidObjects()
             brick = new GameObject(glm::vec2(14065.0f + (100 * j), this->height - 180.0f - 65 * i), glm::vec2(100.0f, 65.0f), 0.0f, glm::vec3(1.0f));
             brick->SetTexture(ResourceManager::GetTexture("test"));
             objList.push_back(brick);
+            grounds.push_back(brick);
         }
         st--;
     }
@@ -358,6 +376,7 @@ void Game::InitSolidObjects()
             brick = new GameObject(glm::vec2(14870.0f + (100 * j), this->height - 180.0f - 65 * i), glm::vec2(100.0f, 65.0f), 0.0f, glm::vec3(1.0f));
             brick->SetTexture(ResourceManager::GetTexture("test"));
             objList.push_back(brick);
+            grounds.push_back(brick);
         }
         st++;
     }
@@ -370,6 +389,7 @@ void Game::InitSolidObjects()
             brick = new GameObject(glm::vec2(15570.0f + (100 * j), this->height - 180.0f - 65 * i), glm::vec2(100.0f, 65.0f), 0.0f, glm::vec3(1.0f));
             brick->SetTexture(ResourceManager::GetTexture("test"));
             objList.push_back(brick);
+            grounds.push_back(brick);
         }
         st--;
     }
@@ -383,6 +403,7 @@ void Game::InitSolidObjects()
             brick = new GameObject(glm::vec2(18185.0f + (100 * j), this->height - 180.0f - 65 * i), glm::vec2(100.0f, 65.0f), 0.0f, glm::vec3(1.0f));
             brick->SetTexture(ResourceManager::GetTexture("test"));
             objList.push_back(brick);
+            grounds.push_back(brick);
         }
         st++;
     }
@@ -391,18 +412,22 @@ void Game::InitSolidObjects()
     ground = new GameObject(glm::vec2(0.0f, this->height * 2 - 55.0f), glm::vec2(this->width, 50.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(0.0f, this->height + 130.0f), glm::vec2(95.0f, this->height - 190.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(395.0f, this->height + 650.0f), glm::vec2(700.0f, 180.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 
     ground = new GameObject(glm::vec2(this->width - 95.0f, this->height + 120.0f), glm::vec2(85.0f, 600.0f), 0.0f, glm::vec3(1.0f));
     ground->SetTexture(ResourceManager::GetTexture("test"));
     objList.push_back(ground);
+    grounds.push_back(ground);
 }
 
 void Game::InitTubes()
@@ -410,31 +435,38 @@ void Game::InitTubes()
     // overworld
     Tube* tube = new Tube(glm::vec2(2820.0f, this->height - 240.0f),  glm::vec2(190.0f, 130.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     tube = new Tube(glm::vec2(3825.0f, this->height - 300.0f), glm::vec2(190.0f, 190.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     tube = new Tube(glm::vec2(4625.0f, this->height - 370.0f), glm::vec2(190.0f, 260.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     tube = new Tube(glm::vec2(5730.0f, this->height - 370.0f), glm::vec2(190.0f, 260.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     tube = new Tube(glm::vec2(16385.0f, this->height - 240.0f), glm::vec2(190.0f, 125.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     tube = new Tube(glm::vec2(17990.0f, this->height - 240.0f), glm::vec2(190.0f, 125.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 
     // underworld
     tube = new Tube(glm::vec2(this->width - 300.0f, this->height * 2 - 180.0f), glm::vec2(300.0f, 125.0f));
     tube->SetTexture(ResourceManager::GetTexture("test"));
+    tubes.push_back(tube);
     objList.push_back(tube);
 }
 
@@ -467,7 +499,6 @@ void Game::InitBricks()
     brick = new Brick(glm::vec2(6430.0f, 462.0f), glm::vec2(102.0f, 65.0f), INVISIBLE);
     bricks.push_back(brick);
     objList.push_back(brick);
-
 
     for (size_t i = 0; i < 15; i++)
     {
@@ -572,7 +603,6 @@ void Game::InitCoins()
 }
 // - - - - - - - - - - - - - - -
 
-
 Game::~Game()
 {
     // tools
@@ -593,6 +623,8 @@ Game::~Game()
     animatedObj.clear();
     moveableObj.clear();
 
+    grounds.clear();
+    tubes.clear();
     bricks.clear();
     coins.clear();
     // ---------

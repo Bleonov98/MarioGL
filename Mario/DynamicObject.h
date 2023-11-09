@@ -14,8 +14,9 @@ public:
 
 	virtual void PlayAnimation() = 0;
 
-	void Drop(bool isOnGround);
-	bool GroundCollision(AABB& one, AABB& two) { return hBox.IntersectSide(one.GetSide(BOTTOM), two.GetSide(TOP)); };
+	void Drop(float dt, bool isOnGround);
+	bool GroundCollision(GameObject& two);
+	bool IsOnGround() { return isOnGround; }
 
 	float GetSpeed() { return speed; }
 	bool AnimationPlayed(float dt);
@@ -24,10 +25,9 @@ public:
 
 protected:
 
-	float speed, gravity = 0.5f, vertSpeed = 0.0f, animationTime = 0.0f;
+	float speed, gravity = 0.0001f, vertSpeed = 5.0f, animationTime = 0.0f;
 	int frame = 0;
-	bool animToggle = false;
-
+	bool animToggle = false, isOnGround = false;
 };
 
 #endif // !DYNAMIC_H

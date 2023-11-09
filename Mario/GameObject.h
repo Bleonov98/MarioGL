@@ -21,7 +21,14 @@ public:
 	void SetAngle(float angle) { this->angle = angle; }
 
 	void SetTexture(Texture texture) { mesh.AddTexture(texture); }
+
+	// AABB
 	void UpdateAABB() { hBox.SetBorder(position, position + size); }
+	spriteSide GetSpriteSide(Side side) { return hBox.GetSide(side); }
+
+	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
+	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
+	bool IsOnScreen(glm::vec2 screenPos, glm::vec2 screenSize) { return hBox.Intersects(screenPos, screenSize); }
 
 	// Get
 	glm::vec2 GetPos() { return position; }
@@ -31,10 +38,6 @@ public:
 
 	// main
 	void DrawObject() { mesh.Draw(); }
-
-	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
-	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
-	bool IsOnScreen(glm::vec2 screenPos, glm::vec2 screenSize) { return hBox.Intersects(screenPos, screenSize); }
 	
 	// end
 	void DeleteObject() { this->deleted = true; }

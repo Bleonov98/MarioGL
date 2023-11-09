@@ -70,11 +70,12 @@ private:
 	std::vector<GameObject*> objList;
 
 	std::vector<DynamicObject*> animatedObj;
-	std::vector<Brick*> bricks;
-	std::vector<Coin*> coins;
-
 	std::vector<DynamicObject*> moveableObj;
 
+	std::vector<GameObject*> grounds;
+	std::vector<Tube*> tubes;
+	std::vector<Brick*> bricks;
+	std::vector<Coin*> coins;
 
 	int width, height;
 	bool toggle = false;
