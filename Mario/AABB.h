@@ -22,23 +22,23 @@ public:
 
     bool Intersects(const AABB& other) const {
         return (min.x <= other.max.x && max.x >= other.min.x &&
-            min.y <= other.max.y && max.y >= other.min.y);
+                min.y <= other.max.y && max.y >= other.min.y);
+    }
+
+    bool IntersectGround(const AABB& other) {
+        spriteSide side = GetSide(BOTTOM);
+        return (side.first.x <= other.max.x && side.second.x >= other.min.x &&
+                side.first.y <= other.max.y && side.first.y >= other.min.y);
     }
 
     bool Intersects(const glm::vec2 otherPos, const glm::vec2 otherSize) const {
         return (min.x <= otherPos.x + otherSize.x && max.x >= otherPos.x &&
-            min.y <= otherPos.y + otherSize.y && max.y >= otherPos.y);
+                min.y <= otherPos.y + otherSize.y && max.y >= otherPos.y);
     }
 
     bool IntersectPoint(const glm::vec2 point) const {
         return (min.x <= point.x && max.x >= point.x &&
                 min.y <= point.y && max.y >= point.y);
-    }
-
-    bool IntersectGround(const spriteSide other) {
-        spriteSide side = GetSide(BOTTOM);
-        return (side.first.x <= other.second.x && side.second.x >= other.first.x &&
-                (side.first.y >= other.first.y && side.second.y >= other.second.y));
     }
 
     void SetBorder(const glm::vec2& newMin, const glm::vec2& newMax) {

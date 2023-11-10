@@ -132,11 +132,12 @@ void Game::ProcessInput(float dt)
     if (gmState == ACTIVE) {
 
         // player movement
-        if (this->Keys[GLFW_KEY_RIGHT]) player->Move(dt, MOVERIGHT);
-        else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Move(dt, MOVELEFT);
-        else if (this->Keys[GLFW_KEY_SPACE] && player->IsOnGround()) player->Jump(dt);
-        else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround() /* -> CHANGE */) player->Move(dt, DUCK);
-        else player->Move(dt, STAND);
+        if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, MOVERIGHT);
+        else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Action(dt, MOVELEFT);
+        else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround()) player->Action(dt, DUCK);
+        else player->Action(dt, STAND);
+
+        if (this->Keys[GLFW_KEY_SPACE]) player->Jump(dt);
 
         // collision
         if (player->GetPos().x < camera.cameraPos.x) player->SetPos(glm::vec2(camera.cameraPos.x, player->GetPos().y));
@@ -145,7 +146,7 @@ void Game::ProcessInput(float dt)
         float midScreenX = camera.cameraPos.x + this->width / 2.0f;
         if (player->GetPos().x > midScreenX) camera.cameraPos.x += player->GetPos().x - midScreenX;
 
-        if (this->Keys[GLFW_KEY_SPACE]) gmState = PAUSED;
+        if (this->Keys[GLFW_KEY_P]) gmState = PAUSED;
         
         // Temp - - - - - - - - - - - - - - - - -
         if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
@@ -199,22 +200,6 @@ void Game::Update(float dt)
     if (gmState == ACTIVE) {
 
         // actions
-        for (auto i : moveableObj)
-        {
-            for (auto j : grounds)
-            {
-                i->Drop(dt, i->GroundCollision(*j));
-            }
-            for (auto j : tubes)
-            {
-                i->Drop(dt, i->GroundCollision(*j));
-            }
-            for (auto j : bricks)
-            {
-                i->Drop(dt, i->GroundCollision(*j));  // -> change (goes multiple times)
-            }
-        }
-
         for (auto i : animatedObj)
         {
             if (i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
@@ -227,6 +212,24 @@ void Game::Update(float dt)
         }
 
         // interactions
+
+        // ground collision
+        std::vector<GameObject*> groundObjects;
+        groundObjects.insert(groundObjects.end(), grounds.begin(), grounds.end());
+        groundObjects.insert(groundObjects.end(), tubes.begin(), tubes.end());
+        groundObjects.insert(groundObjects.end(), bricks.begin(), bricks.end());
+
+        for (auto i : moveableObj)
+        {
+            for (auto j : groundObjects)
+            {
+                if (i->ProccesGroundCollision(*j)) break;
+            }
+
+            i->Drop(dt);
+        }
+
+        // collision
     }
 }
 

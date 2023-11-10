@@ -1,7 +1,7 @@
 #include "Mario.h"
 
 // actions - - - - - - - - - - - - - - - - - - - -
-void Mario::Move(float dt, MarioAction direction)
+void Mario::Action(float dt, MarioAction direction)
 {
 	if (lastDir != direction) restartAnim = true;
 	else restartAnim = false;
@@ -10,8 +10,8 @@ void Mario::Move(float dt, MarioAction direction)
 		const std::string standDirection = (lastDir == MOVERIGHT) ? "_right_stand" : "_left_stand";
 		const std::string duckDirection = (lastDir == MOVERIGHT) ? "_right_duck" : "_left_duck";
 		
-		if (direction == STAND) SetTexture(ResourceManager::GetTexture(GetSprite() + standDirection));
-		else if (direction == DUCK) SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection)); // -> add resize
+		if (direction == STAND && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + standDirection));
+		else if (direction == DUCK && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection)); // -> add resize
 
 		if (inertia > 0.0f) {
 			inertia -= 1.5f;
@@ -47,13 +47,18 @@ void Mario::Move(float dt, MarioAction direction)
 
 void Mario::Jump(float dt)
 {
+	if (lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
+	else if (lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
+
+	if (isOnGround) position.y -= jumpStrength * dt;
+	else vertSpeed -= jumpStrength;
 }
 
 // animations - - - - - - - - - - - - - - - - - - - - - - -
 void Mario::PlayAnimation()
 {
-	if (!restartAnim && lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_" + std::to_string(frame)));
-	else if (!restartAnim && lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_" + std::to_string(frame)));
+	if (!restartAnim && lastDir == MOVELEFT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_" + std::to_string(frame)));
+	else if (!restartAnim && lastDir == MOVERIGHT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_" + std::to_string(frame)));
 	else if (restartAnim) {
 		animToggle = false;
 		frame = 0;

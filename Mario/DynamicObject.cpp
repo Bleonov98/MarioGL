@@ -1,23 +1,24 @@
 #include "DynamicObject.h"
 
-void DynamicObject::Drop(float dt, bool isOnGround)
+void DynamicObject::Drop(float dt)
 {
-	if (isOnGround) vertSpeed = 5.0f;
+	if (isOnGround) vertSpeed = 10.0f;
 	else {
 		vertSpeed += gravity;
 		position.y += vertSpeed * dt;
-		this->isOnGround = false;
 	}
 }
 
-bool DynamicObject::GroundCollision(GameObject& two)
+bool DynamicObject::ProccesGroundCollision(GameObject& two)
 {
-	if (hBox.IntersectGround(two.GetSpriteSide(TOP))) { // -> change 
-		position.y = two.GetSpriteSide(TOP).first.y - size.y;
+	if (GroundCollision(two)) { 
+		position.y = two.GetPos().y - size.y;
 		isOnGround = true;
-		return true; 
+		vertSpeed = speed;
 	}
-	return false;
+	else isOnGround = false;
+
+	return isOnGround;
 }
 
 bool DynamicObject::AnimationPlayed(float dt)

@@ -27,7 +27,7 @@ public:
 	void CollectCoin();
 	int GetCoins() { return coins; }
 
-	void Move(float dt, MarioAction direction);
+	void Action(float dt, MarioAction direction);
 	void Jump(float dt);
 	void Fire();
 
@@ -44,7 +44,7 @@ private:
 	glm::vec2 startSize;
 
 	int type = BIG, coins = 0, life = 3;
-	float inertia = 0.0f;
+	float inertia = 0.0f, jumpStrength = 20.0f;
 
 	MarioAction lastDir = MOVERIGHT;
 	bool restartAnim = false;
