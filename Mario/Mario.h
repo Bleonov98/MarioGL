@@ -24,16 +24,24 @@ public:
 		startSize = size;
 	};
 
+	// items interactions
 	void CollectCoin();
-	int GetCoins() { return coins; }
+	int GetCoins() { return this->coins; }
+	int GetScore() { return this->score; }
 
+	// movement, animation
 	void Action(float dt, MarioAction direction);
 	void Jump(float dt);
 	void Fire();
 
 	void PlayAnimation() override;
 	void DeathAnimation(glm::vec2 screenPos, float height) override;
+
+	bool ProccesTopCollision(GameObject& two);
+
+	// types and actions
 	std::string GetSprite();
+	int GetMarioType() { return this->type; }
 
 	void Upgrade();
 	void Hit();
@@ -43,8 +51,8 @@ private:
 	std::string marioType;
 	glm::vec2 startSize;
 
-	int type = BIG, coins = 0, life = 3;
-	float inertia = 0.0f, jumpStrength = 20.0f;
+	int type = LITTLE, coins = 0, life = 3, score = 0;
+	float inertia = 0.0f, jumpStrength = 900.0f;
 
 	MarioAction lastDir = MOVERIGHT;
 	bool restartAnim = false;

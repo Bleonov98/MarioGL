@@ -28,7 +28,7 @@ public:
 
 	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
 	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
-	bool GroundCollision(const GameObject& other) { return hBox.IntersectGround(other.hBox); }
+	bool SideCollision(const GameObject& other, Side side) { return hBox.IntersectSide(other.hBox, side); }
 	bool IsOnScreen(glm::vec2 screenPos, glm::vec2 screenSize) { return hBox.Intersects(screenPos, screenSize); }
 
 	// Get

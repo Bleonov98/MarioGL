@@ -59,6 +59,11 @@ public:
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
+	
+	void DeleteObjects();
+
+	template <typename T>
+	void DeleteObjectFromVector(std::vector<T*>& vector, bool deleteMemory);
 
 	~Game();
 

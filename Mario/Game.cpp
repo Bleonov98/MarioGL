@@ -205,6 +205,11 @@ void Game::Update(float dt)
             if (i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
         }
 
+        for (auto i : bricks)
+        {
+            if (i->GetType() == COMMON && i->IsMoving()) i->Move(dt);
+        }
+
         // update borders after position changes
         for (auto i : moveableObj)
         {
@@ -213,12 +218,13 @@ void Game::Update(float dt)
 
         // interactions
 
-        // ground collision
+        // collisions
         std::vector<GameObject*> groundObjects;
         groundObjects.insert(groundObjects.end(), grounds.begin(), grounds.end());
         groundObjects.insert(groundObjects.end(), tubes.begin(), tubes.end());
         groundObjects.insert(groundObjects.end(), bricks.begin(), bricks.end());
 
+        // ground collision
         for (auto i : moveableObj)
         {
             for (auto j : groundObjects)
@@ -229,7 +235,14 @@ void Game::Update(float dt)
             i->Drop(dt);
         }
 
-        // collision
+        // top collision
+        for (auto i : bricks)
+        {
+            if (player->ProccesTopCollision(*i)) i->Push(player->GetMarioType() > LITTLE);
+        }
+
+        // delete
+
     }
 }
 
@@ -605,6 +618,31 @@ void Game::InitCoins()
    
 }
 // - - - - - - - - - - - - - - -
+
+void Game::DeleteObjects()
+{
+    DeleteObjectFromVector(animatedObj, false);
+    DeleteObjectFromVector(moveableObj, false);
+
+    DeleteObjectFromVector(tubes, false);
+    DeleteObjectFromVector(coins, false);
+    DeleteObjectFromVector(bricks, false);
+
+    DeleteObjectFromVector(objList, true);
+}
+
+template <typename T>
+void Game::DeleteObjectFromVector(std::vector<T*>& vector, bool deleteMemory)
+{
+    for (auto i = vector.begin(); i != vector.end();)
+    {
+        if ((*i)->IsDeleted()) {
+            if (deleteMemory) delete *i;
+            i = vector.erase(i);
+        }
+        else ++i;
+    }
+}
 
 Game::~Game()
 {

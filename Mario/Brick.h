@@ -42,7 +42,7 @@ public:
 
 	BrickType GetType() { return this->type; }
 	BrickBonus GetBonusType() { return this->bonus; }
-	bool IsMove() { return isMoving; }
+	bool IsMoving() { return isMoving; }
 
 	virtual ~Brick() {}
 

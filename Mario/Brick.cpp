@@ -16,7 +16,7 @@ void Brick::Move(float dt)
 	else if (position.y <= position.y - size.y / 2.0f) reached = true;
 	else if (position.y <= startPos.y && reached) position.y += speed * dt;
 	else if (position.y >= startPos.y && reached) {
-		position.y = startPos.y;
+		position.y = startPos.y; 
 		reached = false, isMoving = false;
 	}
 }

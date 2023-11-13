@@ -25,7 +25,7 @@ public:
 
 protected:
 
-	float speed, gravity = 1.0f, vertSpeed = 10.0f, animationTime = 0.0f;
+	float speed, gravity = 1.8f, vertSpeed = 0.0f, animationTime = 0.0f;
 	int frame = 0;
 	bool animToggle = false, isOnGround = false;
 };

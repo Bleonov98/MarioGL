@@ -2,16 +2,16 @@
 
 void DynamicObject::Drop(float dt)
 {
-	if (isOnGround) vertSpeed = 10.0f;
+	if (isOnGround) vertSpeed = 0.0f;
 	else {
-		vertSpeed += gravity;
+		if (vertSpeed <= 1500.0f) vertSpeed += gravity;
 		position.y += vertSpeed * dt;
 	}
 }
 
 bool DynamicObject::ProccesGroundCollision(GameObject& two)
 {
-	if (GroundCollision(two)) { 
+	if (SideCollision(two, BOTTOM)) { 
 		position.y = two.GetPos().y - size.y;
 		isOnGround = true;
 		vertSpeed = speed;
