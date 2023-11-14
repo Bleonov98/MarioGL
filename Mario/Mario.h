@@ -20,8 +20,8 @@ class Mario : public Person
 {
 public:
 
-	Mario(glm::vec2 position, glm::vec2 size, float speed, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : Person(position, size, speed, angle, color) {
-		startSize = size;
+	Mario(glm::vec2 position, glm::vec2 size, float speed, bool animated = false, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : Person(position, size, speed, animated, angle, color) {
+		startSize = size, startSpeed = speed;
 	};
 
 	// items interactions
@@ -34,10 +34,15 @@ public:
 	void Jump(float dt);
 	void Fire();
 
+	void Accelerate(bool pressed) {
+		if (pressed) speed = startSpeed + 125.0f;
+		else speed = startSpeed;
+	}
+
 	void PlayAnimation() override;
 	void DeathAnimation(glm::vec2 screenPos, float height) override;
 
-	bool ProccesTopCollision(GameObject& two);
+	bool ProcessTopCollision(GameObject& two);
 
 	// types and actions
 	std::string GetSprite();
@@ -52,7 +57,7 @@ private:
 	glm::vec2 startSize;
 
 	int type = LITTLE, coins = 0, life = 3, score = 0;
-	float inertia = 0.0f, jumpStrength = 900.0f;
+	float inertia = 0.0f, jumpStrength = 900.0f, startSpeed;
 
 	MarioAction lastDir = MOVERIGHT;
 	bool restartAnim = false;

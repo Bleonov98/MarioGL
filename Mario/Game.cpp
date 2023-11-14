@@ -36,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 500.0f, 0.0f, glm::vec3(0.9f));
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 350.0f, false, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -58,7 +58,7 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("brick/brick.png", false, "brick");
     ResourceManager::LoadTexture("brick/underbrick.png", false, "underbrick");
 
-    ResourceManager::LoadTexture("brick/destroyed.png", true, "destroyed_brick");
+    ResourceManager::LoadTexture("brick/destroyed_brick.png", true, "destroyed_brick");
     ResourceManager::LoadTexture("brick/destroyed_underbrick.png", true, "destroyed_underbrick");
     ResourceManager::LoadTexture("brick/destroyed_solid.png", true, "destroyed_solid");
 
@@ -137,6 +137,9 @@ void Game::ProcessInput(float dt)
         else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround()) player->Action(dt, DUCK);
         else player->Action(dt, STAND);
 
+        if (this->Keys[GLFW_KEY_LEFT_CONTROL]) player->Accelerate(true);
+        else player->Accelerate(false);
+
         if (this->Keys[GLFW_KEY_SPACE]) player->Jump(dt);
 
         // collision
@@ -200,15 +203,7 @@ void Game::Update(float dt)
     if (gmState == ACTIVE) {
 
         // actions
-        for (auto i : animatedObj)
-        {
-            if (i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
-        }
-
-        for (auto i : bricks)
-        {
-            if (i->GetType() == COMMON && i->IsMoving()) i->Move(dt);
-        }
+        ProcessAnimation(dt);
 
         // update borders after position changes
         for (auto i : moveableObj)
@@ -217,32 +212,64 @@ void Game::Update(float dt)
         }
 
         // interactions
-
-        // collisions
-        std::vector<GameObject*> groundObjects;
-        groundObjects.insert(groundObjects.end(), grounds.begin(), grounds.end());
-        groundObjects.insert(groundObjects.end(), tubes.begin(), tubes.end());
-        groundObjects.insert(groundObjects.end(), bricks.begin(), bricks.end());
-
-        // ground collision
-        for (auto i : moveableObj)
-        {
-            for (auto j : groundObjects)
-            {
-                if (i->ProccesGroundCollision(*j)) break;
-            }
-
-            i->Drop(dt);
-        }
-
-        // top collision
-        for (auto i : bricks)
-        {
-            if (player->ProccesTopCollision(*i)) i->Push(player->GetMarioType() > LITTLE);
-        }
+        ProcessCollision(dt);
 
         // delete
+        DeleteObjects();
+    }
+}
 
+void Game::ProcessCollision(float dt)
+{
+    std::vector<GameObject*> groundObjects;
+    groundObjects.insert(groundObjects.end(), grounds.begin(), grounds.end());
+    groundObjects.insert(groundObjects.end(), tubes.begin(), tubes.end());
+    groundObjects.insert(groundObjects.end(), bricks.begin(), bricks.end());
+
+    GameObject* collidedObj = nullptr;
+    // top collision
+    for (auto i : bricks)
+    {
+        if (player->ProcessTopCollision(*i)) {
+            i->Push(player->GetMarioType() > LITTLE);
+            collidedObj = i;
+            break;
+        }
+    }
+
+    // ground collision
+    for (auto i : moveableObj)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i->ProcessGroundCollision(*j)) break;
+        }
+
+        i->Drop(dt);
+    }
+
+    // side collision
+    for (auto i : moveableObj)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i == player && j == collidedObj) continue;
+            else if (i->ProcessSideCollision(*j)) break;
+        }
+    }
+}
+
+void Game::ProcessAnimation(float dt)
+{
+    for (auto i : animatedObj)
+    {
+        if (i->IsAnimated() && i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
+    }
+
+    for (auto i : bricks)
+    {
+        if (i->GetType() == COMMON && i->IsMoving()) i->Move(dt);
+        else if (i->GetType() == COMMON && i->IsDestroyed()) i->DestroyAnimation(dt);
     }
 }
 
@@ -489,14 +516,15 @@ void Game::InitTubes()
 void Game::InitBricks()
 {
     BrickType type = COMMON;
+    BrickBonus bonus = NONE;
     float addHeight = 0.0f, addWidth = 0.0f;
 
-    Brick* brick = new Brick(glm::vec2(1605.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID);
+    Brick* brick = new Brick(glm::vec2(1605.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
     bricks.push_back(brick);
     animatedObj.push_back(brick);
     objList.push_back(brick);
 
-    brick = new Brick(glm::vec2(2210.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID);
+    brick = new Brick(glm::vec2(2210.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
     bricks.push_back(brick);
     animatedObj.push_back(brick);
     objList.push_back(brick);
@@ -506,7 +534,7 @@ void Game::InitBricks()
         if (i == 1 || i == 3) type = SOLID;
         else type = COMMON;
 
-        brick = new Brick(glm::vec2(2010.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type);
+        brick = new Brick(glm::vec2(2010.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         objList.push_back(brick);
         bricks.push_back(brick);
         if (type == SOLID) animatedObj.push_back(brick);
@@ -524,7 +552,7 @@ void Game::InitBricks()
         if (i == 3) addHeight = 255.0f;
         if (i == 11) addWidth = 295.0f;
 
-        brick = new Brick(glm::vec2(7730.0f + 102.0f * i + addWidth, 525.0f - addHeight), glm::vec2(102.0f, 65.0f), type);
+        brick = new Brick(glm::vec2(7730.0f + 102.0f * i + addWidth, 525.0f - addHeight), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         bricks.push_back(brick);
         objList.push_back(brick);
         if (type == SOLID) animatedObj.push_back(brick);
@@ -543,18 +571,18 @@ void Game::InitBricks()
 
     for (size_t i = 0; i < 3; i++)
     {
-        brick = new Brick(glm::vec2(10650.0f + 300.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), SOLID);
+        brick = new Brick(glm::vec2(10650.0f + 300.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
         bricks.push_back(brick);
         objList.push_back(brick);
         animatedObj.push_back(brick);
     }
 
-    brick = new Brick(glm::vec2(10950.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID);
+    brick = new Brick(glm::vec2(10950.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
     bricks.push_back(brick);
     objList.push_back(brick);
     animatedObj.push_back(brick);
 
-    brick = new Brick(glm::vec2(11860.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID);
+    brick = new Brick(glm::vec2(11860.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
     bricks.push_back(brick);
     objList.push_back(brick);
     animatedObj.push_back(brick);
@@ -566,7 +594,7 @@ void Game::InitBricks()
         if (i == 4 || i == 5) type = SOLID;
         else type = COMMON;
 
-        brick = new Brick(glm::vec2(12155.0f + 102.0f * i + addWidth, 267.0f), glm::vec2(102.0f, 65.0f), type);
+        brick = new Brick(glm::vec2(12155.0f + 102.0f * i + addWidth, 267.0f), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         bricks.push_back(brick);
         objList.push_back(brick);
         if (type == SOLID) animatedObj.push_back(brick);
@@ -584,7 +612,7 @@ void Game::InitBricks()
         if (i == 2) type = SOLID;
         else type = COMMON;
 
-        brick = new Brick(glm::vec2(16880.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type);
+        brick = new Brick(glm::vec2(16880.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         bricks.push_back(brick);
         objList.push_back(brick);
         if (type == SOLID) animatedObj.push_back(brick);
@@ -609,7 +637,7 @@ void Game::InitCoins()
         {
             if (i == 0 && (j == 0 || j == 6)) continue;
 
-            coin = new Coin(glm::vec2(415.0f + 100.0f * j, this->height + 325.0f + 130.0f * i), glm::vec2(60.0f, 60.0f));
+            coin = new Coin(glm::vec2(415.0f + 100.0f * j, this->height + 325.0f + 130.0f * i), glm::vec2(60.0f, 60.0f), 100.0f, true);
             objList.push_back(coin);
             animatedObj.push_back(coin);
             coins.push_back(coin);

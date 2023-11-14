@@ -50,6 +50,10 @@ public:
 	// resources
 	void LoadResources();
 
+	// actions, collisions
+	void ProcessCollision(float dt);
+	void ProcessAnimation(float dt);
+
 	// level
 	void InitLevelObjects();
 	void InitSolidObjects();
@@ -60,6 +64,7 @@ public:
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
+	// delete, destruct
 	void DeleteObjects();
 
 	template <typename T>
@@ -74,8 +79,8 @@ private:
 
 	std::vector<GameObject*> objList;
 
-	std::vector<DynamicObject*> animatedObj;
 	std::vector<DynamicObject*> moveableObj;
+	std::vector<DynamicObject*> animatedObj;
 
 	std::vector<GameObject*> grounds;
 	std::vector<Tube*> tubes;

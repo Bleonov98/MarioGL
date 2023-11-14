@@ -28,6 +28,12 @@ public:
     bool IntersectSide(const AABB& other, Side objSide) {
         spriteSide side = GetSide(objSide);
         return (side.first.x <= other.max.x && side.second.x >= other.min.x &&
+            side.first.y <= other.max.y && side.first.y >= other.min.y);
+    }
+
+    bool IntersectVerticalSide(const AABB& other, Side objSide) {
+        spriteSide side = GetSide(objSide);
+        return (side.first.x <= other.max.x && side.second.x >= other.min.x &&
                 side.first.y <= other.max.y && side.first.y >= other.min.y);
     }
 

@@ -10,10 +10,16 @@ void Brick::PlayAnimation()
 	if (frame == 0 || frame == 2) animToggle = !animToggle;
 }
 
+void Brick::DestroyAnimation(float dt)
+{
+	animationTime += dt;
+	if (animationTime >= 0.11f) DeleteObject();
+}
+
 void Brick::Move(float dt)
 {
-	if (position.y > position.y - size.y / 2.0f && !reached) position.y -= speed * dt;
-	else if (position.y <= position.y - size.y / 2.0f) reached = true;
+	if (position.y > startPos.y - size.y / 2.0f && !reached) position.y -= speed * dt;
+	else if (position.y <= startPos.y - size.y / 2.0f && !reached) reached = true;
 	else if (position.y <= startPos.y && reached) position.y += speed * dt;
 	else if (position.y >= startPos.y && reached) {
 		position.y = startPos.y; 
@@ -25,11 +31,18 @@ void Brick::Push(bool destroy)
 {
 	if (type == COMMON && !destroy) isMoving = true; 
 	else if (type == COMMON && destroy) {
-		if (position.y > 900.0f) SetTexture(ResourceManager::GetTexture("destroyed_underbrick"));
+		if (underGround) SetTexture(ResourceManager::GetTexture("destroyed_underbrick"));
 		else SetTexture(ResourceManager::GetTexture("destroyed_brick"));
-		DeleteObject();
+		destroyed = true;
 	}
-	else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+	else if (type == INVISIBLE) {
+		type = SOLID;
+		SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+	}
+	else if (type == SOLID) {
+		animated = false;
+		SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+	}
 	else if (type == MONEY) {
 		isMoving = true;
 		if (coins > 0) coins--;

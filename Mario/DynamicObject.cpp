@@ -9,7 +9,7 @@ void DynamicObject::Drop(float dt)
 	}
 }
 
-bool DynamicObject::ProccesGroundCollision(GameObject& two)
+bool DynamicObject::ProcessGroundCollision(GameObject& two)
 {
 	if (SideCollision(two, BOTTOM)) { 
 		position.y = two.GetPos().y - size.y;
@@ -19,6 +19,19 @@ bool DynamicObject::ProccesGroundCollision(GameObject& two)
 	else isOnGround = false;
 
 	return isOnGround;
+}
+
+bool DynamicObject::ProcessSideCollision(GameObject& two)
+{
+	if (SideCollision(two, LEFT)) {
+		position.x = two.GetPos().x + two.GetSize().x + 0.1f;
+		return true;
+	}
+	else if (SideCollision(two, RIGHT)) {
+		position.x = two.GetPos().x - size.x - 0.1f;
+		return true;
+	}
+	return false;
 }
 
 bool DynamicObject::AnimationPlayed(float dt)

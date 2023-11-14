@@ -14,7 +14,7 @@ void Mario::Action(float dt, MarioAction direction)
 		else if (direction == DUCK && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection)); // -> add resize
 
 		if (inertia > 0.0f) {
-			inertia -= 1.5f;
+			inertia -= 1.1f;
 			if (inertia < 0.0f) inertia = 0.0f;
 		}
 
@@ -26,14 +26,16 @@ void Mario::Action(float dt, MarioAction direction)
 		}
 	}
 	else if (direction == MOVELEFT || direction == MOVERIGHT) {
-		if (inertia < 600.0f) inertia += 0.5f;
+		if (inertia < 400.0f) inertia += 0.25f;
+
+		if (lastDir != direction) inertia = 0.0f;
 		lastDir = direction;
 
 		if (direction == MOVELEFT) {
-			position.x -= speed * dt;
+			position.x -= (speed + inertia) * dt;
 		}
 		else if (direction == MOVERIGHT) {
-			position.x += speed * dt;
+			position.x += (speed + inertia) * dt;
 		}
 	}
 
@@ -80,10 +82,10 @@ void Mario::DeathAnimation(glm::vec2 screenPos, float height)
 {
 }
 
-bool Mario::ProccesTopCollision(GameObject& two)
+bool Mario::ProcessTopCollision(GameObject& two)
 {
 	if (SideCollision(two, TOP)) {
-		vertSpeed = 150.0f;
+		vertSpeed = 250.0f;
 		return true;
 	}
 	else return false;
