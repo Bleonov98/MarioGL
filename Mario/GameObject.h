@@ -28,7 +28,15 @@ public:
 
 	bool PointCollision(const glm::vec2 point) { return hBox.IntersectPoint(point); }
 	bool ObjectCollision(const GameObject& other) { return hBox.Intersects(other.hBox); }
-	bool SideCollision(const GameObject& other, Side side) { return hBox.IntersectSide(other.hBox, side); }
+	bool ObjectCollision(const glm::vec2& otherPos, const glm::vec2& otherSize) { return hBox.Intersects(otherPos, otherSize); }
+
+		// sides
+	bool GroundCollision(const GameObject& other) { return hBox.IntersectBottom(other.hBox); }
+	bool RightCollision(const GameObject& other) { return hBox.IntersectRight(other.hBox); }
+	bool LeftCollision(const GameObject& other) { return hBox.IntersectLeft(other.hBox); }
+	bool TopCollision(const GameObject& other) { return hBox.IntersectTop(other.hBox); }
+
+		// visible
 	bool IsOnScreen(glm::vec2 screenPos, glm::vec2 screenSize) { return hBox.Intersects(screenPos, screenSize); }
 
 	// Get

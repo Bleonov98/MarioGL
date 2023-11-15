@@ -11,7 +11,7 @@ void DynamicObject::Drop(float dt)
 
 bool DynamicObject::ProcessGroundCollision(GameObject& two)
 {
-	if (SideCollision(two, BOTTOM)) { 
+	if (GroundCollision(two)) { 
 		position.y = two.GetPos().y - size.y;
 		isOnGround = true;
 		vertSpeed = speed;
@@ -23,11 +23,11 @@ bool DynamicObject::ProcessGroundCollision(GameObject& two)
 
 bool DynamicObject::ProcessSideCollision(GameObject& two)
 {
-	if (SideCollision(two, LEFT)) {
+	if (LeftCollision(two)) {
 		position.x = two.GetPos().x + two.GetSize().x + 0.1f;
 		return true;
 	}
-	else if (SideCollision(two, RIGHT)) {
+	else if (RightCollision(two)) {
 		position.x = two.GetPos().x - size.x - 0.1f;
 		return true;
 	}

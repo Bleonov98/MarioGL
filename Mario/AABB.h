@@ -20,33 +20,44 @@ enum Side {
 class AABB {
 public:
 
+    // general
     bool Intersects(const AABB& other) const {
         return (min.x <= other.max.x && max.x >= other.min.x &&
                 min.y <= other.max.y && max.y >= other.min.y);
     }
 
-    bool IntersectSide(const AABB& other, Side objSide) {
-        spriteSide side = GetSide(objSide);
-        return (side.first.x <= other.max.x && side.second.x >= other.min.x &&
-            side.first.y <= other.max.y && side.first.y >= other.min.y);
-    }
-
-    bool IntersectVerticalSide(const AABB& other, Side objSide) {
-        spriteSide side = GetSide(objSide);
-        return (side.first.x <= other.max.x && side.second.x >= other.min.x &&
-                side.first.y <= other.max.y && side.first.y >= other.min.y);
-    }
-
     bool Intersects(const glm::vec2 otherPos, const glm::vec2 otherSize) const {
         return (min.x <= otherPos.x + otherSize.x && max.x >= otherPos.x &&
-                min.y <= otherPos.y + otherSize.y && max.y >= otherPos.y);
+            min.y <= otherPos.y + otherSize.y && max.y >= otherPos.y);
     }
 
     bool IntersectPoint(const glm::vec2 point) const {
         return (min.x <= point.x && max.x >= point.x &&
-                min.y <= point.y && max.y >= point.y);
+            min.y <= point.y && max.y >= point.y);
     }
 
+    // sides
+    bool IntersectBottom(const AABB& other) {
+        return (min.x <= other.max.x && max.x >= other.min.x &&
+                max.y >= other.min.y && max.y <= other.min.y + 2.0f);
+    }
+
+    bool IntersectTop(const AABB& other) {
+        return (min.x <= other.max.x && max.x >= other.min.x &&
+                min.y <= other.max.y && min.y >= other.max.y - 2.0f);
+    }
+
+    bool IntersectLeft(const AABB& other) {
+        return (min.x <= other.max.x && min.x >= other.max.x - 5.0f &&
+                min.y <= other.max.y - 2.0f && max.y >= other.min.y + 2.0f);
+    }
+    
+    bool IntersectRight(const AABB& other) {
+        return (max.x <= other.min.x + 5.0f && max.x >= other.min.x &&
+                min.y <= other.max.y - 2.0f && max.y >= other.min.y + 2.0f);
+    }
+
+    // basics
     void SetBorder(const glm::vec2& newMin, const glm::vec2& newMax) {
         min = newMin;
         max = newMax;

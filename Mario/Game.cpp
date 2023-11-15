@@ -36,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 350.0f, false, 0.0f, glm::vec3(0.9f));
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 300.0f, false, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -140,7 +140,10 @@ void Game::ProcessInput(float dt)
         if (this->Keys[GLFW_KEY_LEFT_CONTROL]) player->Accelerate(true);
         else player->Accelerate(false);
 
-        if (this->Keys[GLFW_KEY_SPACE]) player->Jump(dt);
+        if (this->Keys[GLFW_KEY_SPACE]) { 
+            player->Jump(dt, this->KeysProcessed[GLFW_KEY_SPACE]); 
+            this->KeysProcessed[GLFW_KEY_SPACE] = true;
+        }
 
         // collision
         if (player->GetPos().x < camera.cameraPos.x) player->SetPos(glm::vec2(camera.cameraPos.x, player->GetPos().y));
@@ -153,7 +156,7 @@ void Game::ProcessInput(float dt)
         
         // Temp - - - - - - - - - - - - - - - - -
         if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
-            
+             
             toggle = !toggle;
             this->KeysProcessed[GLFW_KEY_L] = true;
 
@@ -226,17 +229,6 @@ void Game::ProcessCollision(float dt)
     groundObjects.insert(groundObjects.end(), tubes.begin(), tubes.end());
     groundObjects.insert(groundObjects.end(), bricks.begin(), bricks.end());
 
-    GameObject* collidedObj = nullptr;
-    // top collision
-    for (auto i : bricks)
-    {
-        if (player->ProcessTopCollision(*i)) {
-            i->Push(player->GetMarioType() > LITTLE);
-            collidedObj = i;
-            break;
-        }
-    }
-
     // ground collision
     for (auto i : moveableObj)
     {
@@ -248,13 +240,21 @@ void Game::ProcessCollision(float dt)
         i->Drop(dt);
     }
 
+    // top collision
+    for (auto i : bricks)
+    {
+        if (player->ProcessTopCollision(*i)) {
+            i->Push(player->GetMarioType() > LITTLE);
+            break;
+        }
+    }
+
     // side collision
     for (auto i : moveableObj)
     {
         for (auto j : groundObjects)
         {
-            if (i == player && j == collidedObj) continue;
-            else if (i->ProcessSideCollision(*j)) break;
+            if (i->ProcessSideCollision(*j)) break;
         }
     }
 }

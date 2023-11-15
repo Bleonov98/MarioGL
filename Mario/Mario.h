@@ -31,7 +31,7 @@ public:
 
 	// movement, animation
 	void Action(float dt, MarioAction direction);
-	void Jump(float dt);
+	void Jump(float dt, bool processed);
 	void Fire();
 
 	void Accelerate(bool pressed) {

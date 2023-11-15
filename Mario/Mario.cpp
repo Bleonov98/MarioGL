@@ -47,17 +47,17 @@ void Mario::Action(float dt, MarioAction direction)
 	}
 }
 
-void Mario::Jump(float dt)
+void Mario::Jump(float dt, bool processed)
 {
-	if (lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
-	else if (lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
-
-	if (isOnGround) {
+	if (isOnGround && !processed) {
 		vertSpeed = -jumpStrength;
 		position.y -= 5.0f;
 	}
-	else {
+	else if (!isOnGround) {
 		vertSpeed -= gravity / 3.0f;
+
+		if (lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
+		else if (lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
 	}
 }
 
@@ -84,7 +84,7 @@ void Mario::DeathAnimation(glm::vec2 screenPos, float height)
 
 bool Mario::ProcessTopCollision(GameObject& two)
 {
-	if (SideCollision(two, TOP)) {
+	if (TopCollision(two) && vertSpeed < 0.0f) {
 		vertSpeed = 250.0f;
 		return true;
 	}
