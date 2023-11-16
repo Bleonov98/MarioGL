@@ -32,10 +32,16 @@ public:
 	// movement, animation
 	void Action(float dt, MarioAction direction);
 	void Jump(float dt, bool processed);
+
+	bool IsReload() {
+		if (ammo > 0) return true;
+		else return false;
+	}
+	void Reload() { if (ammo < 2) ammo++; }
 	void Fire();
 
 	void Accelerate(bool pressed) {
-		if (pressed) speed = startSpeed + 125.0f;
+		if (pressed) speed = startSpeed + 120.0f;
 		else speed = startSpeed;
 	}
 
@@ -56,7 +62,7 @@ private:
 	std::string marioType;
 	glm::vec2 startSize;
 
-	int type = LITTLE, coins = 0, life = 3, score = 0;
+	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 0;
 	float inertia = 0.0f, jumpStrength = 900.0f, startSpeed;
 
 	MarioAction lastDir = MOVERIGHT;

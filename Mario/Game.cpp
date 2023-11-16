@@ -36,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 300.0f, false, 0.0f, glm::vec3(0.9f));
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 150.0f, false, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -123,7 +123,11 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("mario/chief/chief_right_1.png", true, "chief_right_1");
     ResourceManager::LoadTexture("mario/chief/chief_right_2.png", true, "chief_right_2");
 
-    // - smth
+    // - bullet
+    ResourceManager::LoadTexture("bullet/bullet_0.png", true, "bullet_0");
+    ResourceManager::LoadTexture("bullet/bullet_1.png", true, "bullet_1");
+    ResourceManager::LoadTexture("bullet/bullet_2.png", true, "bullet_2");
+    ResourceManager::LoadTexture("bullet/bullet_3.png", true, "bullet_3");
 }
 
 // Actions
@@ -131,24 +135,32 @@ void Game::ProcessInput(float dt)
 {
     if (gmState == ACTIVE) {
 
-        // player movement
+        // Player movement
         if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, MOVERIGHT);
         else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Action(dt, MOVELEFT);
         else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround()) player->Action(dt, DUCK);
         else player->Action(dt, STAND);
 
+        // Acceleration
         if (this->Keys[GLFW_KEY_LEFT_CONTROL]) player->Accelerate(true);
         else player->Accelerate(false);
 
+        // Jump
         if (this->Keys[GLFW_KEY_SPACE]) { 
             player->Jump(dt, this->KeysProcessed[GLFW_KEY_SPACE]); 
             this->KeysProcessed[GLFW_KEY_SPACE] = true;
         }
 
-        // collision
+        // Gun
+        if (this->Keys[GLFW_KEY_Z] && !this->KeysProcessed[GLFW_KEY_Z] && player->IsReload()) {
+            player->Fire();
+            this->KeysProcessed[GLFW_KEY_Z] = true;
+        }
+
+        // Screen collision
         if (player->GetPos().x < camera.cameraPos.x) player->SetPos(glm::vec2(camera.cameraPos.x, player->GetPos().y));
         
-        // move screen
+        // Move screen
         float midScreenX = camera.cameraPos.x + this->width / 2.0f;
         if (player->GetPos().x > midScreenX) camera.cameraPos.x += player->GetPos().x - midScreenX;
 

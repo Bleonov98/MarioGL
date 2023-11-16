@@ -40,6 +40,9 @@
     <ClCompile Include="DynamicObject.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Bullet.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -79,6 +82,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Mario.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Bullet.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

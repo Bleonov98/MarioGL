@@ -61,6 +61,13 @@ void Mario::Jump(float dt, bool processed)
 	}
 }
 
+void Mario::Fire()
+{
+	if (ammo > 0) {
+		ammo--;
+	}
+}
+
 // animations - - - - - - - - - - - - - - - - - - - - - - -
 void Mario::PlayAnimation()
 {
@@ -94,17 +101,23 @@ bool Mario::ProcessTopCollision(GameObject& two)
 // items, collisions - - - - - - - - - - - - - - - - - - - -
 void Mario::Upgrade()
 {
+	score += 1000;
+
 	if (type == LITTLE) {
 		size.y *= 2.0f;
 		type++;
 	}
 	else if (type == BIG) type++;
+	else if (type == CHIEF) ammo = 2;
 }
 
 void Mario::Hit()
 {
 	if (type == LITTLE) Death();
-	else type = LITTLE;
+	else {
+		type = LITTLE;
+		ammo = 0;
+	}
 }
 
 void Mario::CollectCoin()
