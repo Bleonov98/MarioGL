@@ -2,6 +2,12 @@
 #define COIN_H
 
 #include "DynamicObject.h"
+
+enum CoinType {
+	COIN_REGULAR,
+	COIN_BRICK
+};
+
 class Coin : public DynamicObject
 {
 public:
@@ -15,10 +21,14 @@ public:
 
 	void Move(float dt);
 
+	void SetCoinType(CoinType coinType) { this->coinType = coinType; }
+	CoinType GetCoinType() { return this->coinType; }
+
 	virtual ~Coin() {}
 
 private:
 
+	CoinType coinType = COIN_REGULAR;
 	bool isMoving = false, reached = false, madeOnce = false;
 	glm::vec2 startPos;
 };

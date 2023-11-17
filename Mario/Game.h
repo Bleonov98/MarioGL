@@ -12,6 +12,7 @@
 #include "Brick.h"
 #include "Coin.h"
 #include "Mario.h"
+#include "Bullet.h"
 
 enum GameState {
 	MENU,
@@ -51,6 +52,8 @@ public:
 	void LoadResources();
 
 	// actions, collisions
+	void MoveObjects(float dt);
+
 	void ProcessCollision(float dt);
 	void ProcessAnimation(float dt);
 
@@ -86,6 +89,7 @@ private:
 	std::vector<Tube*> tubes;
 	std::vector<Brick*> bricks;
 	std::vector<Coin*> coins;
+	std::vector<Bullet*> bullets;
 
 	int width, height;
 	bool toggle = false;

@@ -2,13 +2,7 @@
 #define MARIO_H
 
 #include "Person.h"
-
-enum MarioAction {
-	STAND,
-	MOVELEFT,
-	MOVERIGHT,
-	DUCK
-};
+#include "Bullet.h"
 
 enum MarioType {
 	LITTLE,
@@ -30,20 +24,19 @@ public:
 	int GetScore() { return this->score; }
 
 	// movement, animation
-	void Action(float dt, MarioAction direction);
+	void Action(float dt, MoveDirection direction);
 	void Jump(float dt, bool processed);
 
-	bool IsReload() {
-		if (ammo > 0) return true;
-		else return false;
-	}
-	void Reload() { if (ammo < 2) ammo++; }
-	void Fire();
+	bool IsReload() { return ammo > 0; }
+	void Reload(std::vector<Bullet*> bullets);
+	void Fire() { if (ammo > 0) ammo--; }
+	MoveDirection GetLastDirection() { return lastDir; }
 
 	void Accelerate(bool pressed) {
 		if (pressed) speed = startSpeed + 120.0f;
 		else speed = startSpeed;
 	}
+	float GetInertia() { return this->inertia; }
 
 	void PlayAnimation() override;
 	void DeathAnimation(glm::vec2 screenPos, float height) override;
@@ -62,10 +55,10 @@ private:
 	std::string marioType;
 	glm::vec2 startSize;
 
-	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 0;
+	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 2;
 	float inertia = 0.0f, jumpStrength = 900.0f, startSpeed;
 
-	MarioAction lastDir = MOVERIGHT;
+	MoveDirection lastDir = DIR_RIGHT;
 	bool restartAnim = false;
 };
 

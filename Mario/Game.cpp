@@ -136,8 +136,8 @@ void Game::ProcessInput(float dt)
     if (gmState == ACTIVE) {
 
         // Player movement
-        if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, MOVERIGHT);
-        else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Action(dt, MOVELEFT);
+        if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, DIR_RIGHT);
+        else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Action(dt, DIR_LEFT);
         else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround()) player->Action(dt, DUCK);
         else player->Action(dt, STAND);
 
@@ -153,7 +153,15 @@ void Game::ProcessInput(float dt)
 
         // Gun
         if (this->Keys[GLFW_KEY_Z] && !this->KeysProcessed[GLFW_KEY_Z] && player->IsReload()) {
+            
             player->Fire();
+
+            Bullet* bullet = new Bullet(glm::vec2(player->GetPos().x + player->GetSize().x / 2.0f, player->GetPos().y + player->GetSize().y / 2.0f), glm::vec2(25.0f), player->GetLastDirection(), true, player->GetSpeed() + player->GetInertia() + 150.0f);
+            objList.push_back(bullet);
+            moveableObj.push_back(bullet);
+            animatedObj.push_back(bullet);
+            bullets.push_back(bullet);
+
             this->KeysProcessed[GLFW_KEY_Z] = true;
         }
 
@@ -220,6 +228,8 @@ void Game::Update(float dt)
         // actions
         ProcessAnimation(dt);
 
+        MoveObjects(dt);
+
         // update borders after position changes
         for (auto i : moveableObj)
         {
@@ -228,9 +238,24 @@ void Game::Update(float dt)
 
         // interactions
         ProcessCollision(dt);
+        
+        player->Reload(bullets); // bullets are deleted after collision
 
         // delete
         DeleteObjects();
+    }
+}
+
+void Game::MoveObjects(float dt)
+{
+    for (auto i : bullets)
+    {
+        i->Move(dt);
+    }
+
+    for (auto i : coins)
+    {
+        i->Move(dt);
     }
 }
 
@@ -252,7 +277,7 @@ void Game::ProcessCollision(float dt)
         i->Drop(dt);
     }
 
-    // top collision
+    // player top collision with bricks
     for (auto i : bricks)
     {
         if (player->ProcessTopCollision(*i)) {
@@ -261,12 +286,24 @@ void Game::ProcessCollision(float dt)
         }
     }
 
-    // side collision
+    // side collision 
     for (auto i : moveableObj)
     {
         for (auto j : groundObjects)
         {
             if (i->ProcessSideCollision(*j)) break;
+        }
+    }
+
+    // bullets are deleted after collision with sides
+    for (auto i : bullets)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i->ProcessSideCollision(*j)) {
+                i->DeleteObject();
+                break;
+            }
         }
     }
 }
@@ -299,6 +336,11 @@ void Game::Render()
     }
     
     for (auto i : coins)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+    
+    for (auto i : bullets)
     {
         if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
@@ -667,6 +709,7 @@ void Game::DeleteObjects()
     DeleteObjectFromVector(tubes, false);
     DeleteObjectFromVector(coins, false);
     DeleteObjectFromVector(bricks, false);
+    DeleteObjectFromVector(bullets, false);
 
     DeleteObjectFromVector(objList, true);
 }
@@ -708,5 +751,6 @@ Game::~Game()
     tubes.clear();
     bricks.clear();
     coins.clear();
+    bullets.clear();
     // ---------
 }

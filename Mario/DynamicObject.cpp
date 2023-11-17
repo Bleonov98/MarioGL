@@ -37,7 +37,7 @@ bool DynamicObject::ProcessSideCollision(GameObject& two)
 bool DynamicObject::AnimationPlayed(float dt)
 {
 	animationTime += dt;
-	if (animationTime >= 0.4f) {
+	if (animationTime >= swapTime) {
 		animationTime = 0.0f;
 		return true;
 	}

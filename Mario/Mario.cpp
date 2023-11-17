@@ -1,14 +1,14 @@
 #include "Mario.h"
 
 // actions - - - - - - - - - - - - - - - - - - - -
-void Mario::Action(float dt, MarioAction direction)
+void Mario::Action(float dt, MoveDirection direction)
 {
 	if (lastDir != direction) restartAnim = true;
 	else restartAnim = false;
 
 	if (direction == STAND || (direction == DUCK && type >= BIG)) {
-		const std::string standDirection = (lastDir == MOVERIGHT) ? "_right_stand" : "_left_stand";
-		const std::string duckDirection = (lastDir == MOVERIGHT) ? "_right_duck" : "_left_duck";
+		const std::string standDirection = (lastDir == DIR_RIGHT) ? "_right_stand" : "_left_stand";
+		const std::string duckDirection = (lastDir == DIR_RIGHT) ? "_right_duck" : "_left_duck";
 		
 		if (direction == STAND && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + standDirection));
 		else if (direction == DUCK && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection)); // -> add resize
@@ -18,27 +18,26 @@ void Mario::Action(float dt, MarioAction direction)
 			if (inertia < 0.0f) inertia = 0.0f;
 		}
 
-		if (lastDir == MOVERIGHT) {
+		if (lastDir == DIR_RIGHT) {
 			position.x += inertia * dt;
 		}
-		else if (lastDir == MOVELEFT) {
+		else if (lastDir == DIR_LEFT) {
 			position.x -= inertia * dt;
 		}
 	}
-	else if (direction == MOVELEFT || direction == MOVERIGHT) {
+	else if (direction == DIR_LEFT || direction == DIR_RIGHT) {
 		if (inertia < 400.0f) inertia += 0.25f;
 
 		if (lastDir != direction) inertia = 0.0f;
 		lastDir = direction;
 
-		if (direction == MOVELEFT) {
+		if (direction == DIR_LEFT) {
 			position.x -= (speed + inertia) * dt;
 		}
-		else if (direction == MOVERIGHT) {
+		else if (direction == DIR_RIGHT) {
 			position.x += (speed + inertia) * dt;
 		}
 	}
-
 
 	animationTime += dt;
 	if (animationTime >= 0.1f) {
@@ -56,23 +55,24 @@ void Mario::Jump(float dt, bool processed)
 	else if (!isOnGround) {
 		vertSpeed -= gravity / 3.0f;
 
-		if (lastDir == MOVELEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
-		else if (lastDir == MOVERIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
+		if (lastDir == DIR_LEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
+		else if (lastDir == DIR_RIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
 	}
 }
 
-void Mario::Fire()
+void Mario::Reload(std::vector<Bullet*> bullets)
 {
-	if (ammo > 0) {
-		ammo--;
+	for (auto i : bullets)
+	{
+		if (i->IsDeleted()) ammo++;
 	}
 }
 
 // animations - - - - - - - - - - - - - - - - - - - - - - -
 void Mario::PlayAnimation()
 {
-	if (!restartAnim && lastDir == MOVELEFT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_" + std::to_string(frame)));
-	else if (!restartAnim && lastDir == MOVERIGHT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_" + std::to_string(frame)));
+	if (!restartAnim && lastDir == DIR_LEFT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_" + std::to_string(frame)));
+	else if (!restartAnim && lastDir == DIR_RIGHT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_" + std::to_string(frame)));
 	else if (restartAnim) {
 		animToggle = false;
 		frame = 0;

@@ -4,6 +4,15 @@
 #include "GameObject.h"
 #include "ResourceManager.h"
 
+enum MoveDirection {
+	STAND,
+	DIR_UP,
+	DIR_DOWN,
+	DIR_LEFT,
+	DIR_RIGHT,
+	DUCK
+};
+
 class DynamicObject : public GameObject
 {
 public:
@@ -24,11 +33,15 @@ public:
 	bool IsOnGround() { return isOnGround; }
 	float GetSpeed() { return speed; }
 
+	MoveDirection GetDirection() { return direction; }
+	void SetDirection(MoveDirection direction) { this->direction = direction; }
+
 	virtual ~DynamicObject() {}
 
 protected:
 
-	float speed, gravity = 1.8f, vertSpeed = 0.0f, animationTime = 0.0f;
+	MoveDirection direction = STAND;
+	float speed, gravity = 1.8f, vertSpeed = 0.0f, animationTime = 0.0f, swapTime = 0.4f;
 	int frame = 0;
 	bool animToggle = false, isOnGround = false, animated = false;
 };
