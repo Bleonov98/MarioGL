@@ -43,6 +43,7 @@
     <ClCompile Include="Bullet.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Plant.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -87,6 +88,7 @@
     <ClInclude Include="Bullet.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Plant.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">
