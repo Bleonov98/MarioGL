@@ -16,19 +16,24 @@ public:
 		: DynamicObject(position, size, animated, speed, angle, color) 
 	{
 		this->plantType = type;
+		this->startPos = position;
 	};
 
-	void Arise(float dt);
+	void Sprout(float dt);
+	bool IsSprouted() { return isSprouted; }
+
 	void Move(float dt);
 
 	void PlayAnimation() override;
 
 	void SetMushroomType(PlantType plantType) { this->plantType = plantType; }
-	PlantType GetMushroomType() { return this->plantType; }
+	PlantType GetPlantType() { return this->plantType; }
 
 private:
 
+	glm::vec2 startPos;
 	PlantType plantType;
+	bool isSprouted = false;
 
 };
 

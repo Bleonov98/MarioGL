@@ -13,6 +13,7 @@
 #include "Coin.h"
 #include "Mario.h"
 #include "Bullet.h"
+#include "Plant.h"
 
 enum GameState {
 	MENU,
@@ -64,6 +65,11 @@ public:
 	void InitBricks();
 	void InitCoins();
 
+	void SpawnBonus(Brick* brick);
+	void SpawnPlant(Brick* brick);
+	void SpawnStar(Brick* brick);
+	void SpawnCoin(Brick* brick);
+
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
@@ -90,6 +96,7 @@ private:
 	std::vector<Brick*> bricks;
 	std::vector<Coin*> coins;
 	std::vector<Bullet*> bullets;
+	std::vector<Plant*> plants;
 
 	int width, height;
 	bool toggle = false;

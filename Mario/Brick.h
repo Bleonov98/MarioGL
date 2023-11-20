@@ -11,18 +11,18 @@ enum BrickType {
 };
 
 enum BrickBonus {
-	NONE,
-	COIN,
-	UPGRADE,
-	LIFE,
-	STAR
+	BONUS_NONE,
+	BONUS_COIN,
+	BONUS_UPGRADE,
+	BONUS_LIFE,
+	BONUS_STAR
 };
 
 class Brick : public DynamicObject
 {
 public:
 
-	Brick(glm::vec2 position, glm::vec2 size, BrickType type = COMMON, BrickBonus bonus = NONE, bool animated = false, float speed = 300.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) 
+	Brick(glm::vec2 position, glm::vec2 size, BrickType type = COMMON, BrickBonus bonus = BONUS_NONE, bool animated = false, float speed = 300.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) 
 		: DynamicObject(position, size, animated, speed, angle, color) 
 	{
 		this->type = type, this->bonus = bonus, startPos = position;
@@ -35,7 +35,7 @@ public:
 		}
 		else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("test"));
 
-		if (type == MONEY) bonus = COIN;
+		if (type == MONEY) bonus = BONUS_COIN;
 	};
 
 	// animations

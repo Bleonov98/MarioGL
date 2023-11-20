@@ -77,18 +77,18 @@ void Game::LoadResources()
         // - lil Mario
     ResourceManager::LoadTexture("mario/lil/mario_left_stand.png", true, "mario_left_stand");
     ResourceManager::LoadTexture("mario/lil/mario_right_stand.png", true, "mario_right_stand");
-                                        
+
     ResourceManager::LoadTexture("mario/lil/mario_left_0.png", true, "mario_left_0");
     ResourceManager::LoadTexture("mario/lil/mario_left_1.png", true, "mario_left_1");
     ResourceManager::LoadTexture("mario/lil/mario_left_2.png", true, "mario_left_2");
-                                        
+
     ResourceManager::LoadTexture("mario/lil/mario_right_0.png", true, "mario_right_0");
     ResourceManager::LoadTexture("mario/lil/mario_right_1.png", true, "mario_right_1");
     ResourceManager::LoadTexture("mario/lil/mario_right_2.png", true, "mario_right_2");
 
     ResourceManager::LoadTexture("mario/lil/mario_left_jump.png", true, "mario_left_jump");
     ResourceManager::LoadTexture("mario/lil/mario_right_jump.png", true, "mario_right_jump");
-        // - big Mario
+    // - big Mario
     ResourceManager::LoadTexture("mario/big/big_left_stand.png", true, "big_left_stand");
     ResourceManager::LoadTexture("mario/big/big_right_stand.png", true, "big_right_stand");
 
@@ -101,24 +101,24 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("mario/big/big_left_0.png", true, "big_left_0");
     ResourceManager::LoadTexture("mario/big/big_left_1.png", true, "big_left_1");
     ResourceManager::LoadTexture("mario/big/big_left_2.png", true, "big_left_2");
-                                        
+
     ResourceManager::LoadTexture("mario/big/big_right_0.png", true, "big_right_0");
     ResourceManager::LoadTexture("mario/big/big_right_1.png", true, "big_right_1");
     ResourceManager::LoadTexture("mario/big/big_right_2.png", true, "big_right_2");
-        // - chief Mario
+    // - chief Mario
     ResourceManager::LoadTexture("mario/chief/chief_left_stand.png", true, "chief_left_stand");
     ResourceManager::LoadTexture("mario/chief/chief_right_stand.png", true, "chief_right_stand");
-                                        
+
     ResourceManager::LoadTexture("mario/chief/chief_left_duck.png", true, "chief_left_duck");
     ResourceManager::LoadTexture("mario/chief/chief_right_duck.png", true, "chief_right_duck");
-                                        
+
     ResourceManager::LoadTexture("mario/chief/chief_left_jump.png", true, "chief_left_jump");
     ResourceManager::LoadTexture("mario/chief/chief_right_jump.png", true, "chief_right_jump");
-                                        
+
     ResourceManager::LoadTexture("mario/chief/chief_left_0.png", true, "chief_left_0");
     ResourceManager::LoadTexture("mario/chief/chief_left_1.png", true, "chief_left_1");
     ResourceManager::LoadTexture("mario/chief/chief_left_2.png", true, "chief_left_2");
-                                        
+
     ResourceManager::LoadTexture("mario/chief/chief_right_0.png", true, "chief_right_0");
     ResourceManager::LoadTexture("mario/chief/chief_right_1.png", true, "chief_right_1");
     ResourceManager::LoadTexture("mario/chief/chief_right_2.png", true, "chief_right_2");
@@ -128,8 +128,16 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("bullet/bullet_1.png", true, "bullet_1");
     ResourceManager::LoadTexture("bullet/bullet_2.png", true, "bullet_2");
     ResourceManager::LoadTexture("bullet/bullet_3.png", true, "bullet_3");
-}
 
+    // - plants
+    ResourceManager::LoadTexture("plant/plant_0.png", true, "plant_0");
+    ResourceManager::LoadTexture("plant/plant_1.png", true, "plant_1");
+    ResourceManager::LoadTexture("plant/plant_2.png", true, "plant_2");
+    ResourceManager::LoadTexture("plant/plant_3.png", true, "plant_3");
+
+    ResourceManager::LoadTexture("plant/mushroom_upgrade.png", true, "mushroom_upgrade");
+    ResourceManager::LoadTexture("plant/mushroom_life.png", true, "mushroom_life");
+}
 // Actions
 void Game::ProcessInput(float dt)
 {
@@ -257,6 +265,12 @@ void Game::MoveObjects(float dt)
     {
         i->Move(dt);
     }
+
+    for (auto i : plants)
+    {
+        if (!i->IsSprouted()) i->Sprout(dt);
+        else if (i->IsSprouted() && (i->GetPlantType() == MUSHROOM_LIFE || i->GetPlantType() == MUSHROOM_UPGRADE)) i->Move(dt);
+    }
 }
 
 void Game::ProcessCollision(float dt)
@@ -341,6 +355,11 @@ void Game::Render()
     }
     
     for (auto i : bullets)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+
+    for (auto i : plants)
     {
         if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
@@ -570,10 +589,10 @@ void Game::InitTubes()
 void Game::InitBricks()
 {
     BrickType type = COMMON;
-    BrickBonus bonus = NONE;
+    BrickBonus bonus = BONUS_NONE;
     float addHeight = 0.0f, addWidth = 0.0f;
 
-    Brick* brick = new Brick(glm::vec2(1605.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
+    Brick* brick = new Brick(glm::vec2(1605.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, BONUS_COIN, true);
     bricks.push_back(brick);
     animatedObj.push_back(brick);
     objList.push_back(brick);
@@ -698,6 +717,20 @@ void Game::InitCoins()
         }
     }
    
+}
+
+void Game::SpawnPlant(Brick* brick)
+{
+    PlantType type = MUSHROOM_UPGRADE;
+    if (brick->GetBonusType() == BONUS_UPGRADE) type = MUSHROOM_UPGRADE;
+    else if (brick->GetBonusType() == BONUS_UPGRADE && player->GetMarioType() > LITTLE) type = PLANT_UPGRADE;
+    else if (brick->GetBonusType() == BONUS_LIFE) type = MUSHROOM_LIFE;
+
+    Plant* plant = new Plant(brick->GetPos(), brick->GetSize(), type, type == PLANT_UPGRADE);
+    objList.push_back(plant);
+    if (type == MUSHROOM_LIFE || type == MUSHROOM_UPGRADE) moveableObj.push_back(plant);
+    else if (type == PLANT_UPGRADE) animatedObj.push_back(plant);
+    plants.push_back(plant);
 }
 // - - - - - - - - - - - - - - -
 

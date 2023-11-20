@@ -38,23 +38,23 @@ public:
 
     // sides
     bool IntersectBottom(const AABB& other) {
-        return (min.x <= other.max.x - 2.0f && max.x >= other.min.x + 2.0f &&
+        return (min.x <= other.max.x - 5.0f && max.x >= other.min.x + 5.0f &&
                 max.y >= other.min.y && max.y <= other.min.y + 2.0f);
     }
 
     bool IntersectTop(const AABB& other) {
-        return (min.x <= other.max.x - 2.0f && max.x >= other.min.x + 2.0f &&
-                min.y <= other.max.y && min.y >= other.max.y - 2.0f);
+        return (min.x <= other.max.x - 5.0f && max.x >= other.min.x + 5.0f &&
+                min.y <= other.max.y && min.y >= other.max.y - 5.0f);
     }
 
     bool IntersectLeft(const AABB& other) {
         return (min.x <= other.max.x && min.x >= other.max.x - 5.0f &&
-                min.y <= other.max.y - 2.0f && max.y >= other.min.y + 2.0f);
+                min.y <= other.max.y - 5.0f && max.y >= other.min.y + 5.0f);
     }
     
     bool IntersectRight(const AABB& other) {
         return (max.x <= other.min.x + 5.0f && max.x >= other.min.x &&
-                min.y <= other.max.y - 2.0f && max.y >= other.min.y + 2.0f);
+                min.y <= other.max.y - 5.0f && max.y >= other.min.y + 5.0f);
     }
 
     // basics
