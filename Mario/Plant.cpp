@@ -2,7 +2,10 @@
 
 void Plant::Sprout(float dt)
 {
-	if (position.y > startPos.y - size.y) position.y -= speed * dt;
+	if (position.y > startPos.y - size.y) {
+		vertSpeed = 0;
+		position.y -= speed * dt;
+	}
 	else isSprouted = true;
 }
 

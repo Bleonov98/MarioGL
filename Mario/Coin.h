@@ -11,7 +11,7 @@ enum CoinType {
 class Coin : public DynamicObject
 {
 public:
-	Coin(glm::vec2 position, glm::vec2 size, float speed = 100.0f, bool animated = false, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, speed, animated, angle, color) {
+	Coin(glm::vec2 position, glm::vec2 size, bool animated = false, float speed = 600.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, animated, speed, angle, color) {
 		startPos = position;
 	}
 

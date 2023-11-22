@@ -35,17 +35,17 @@ void Brick::Push(bool destroy)
 		else SetTexture(ResourceManager::GetTexture("destroyed_brick"));
 		destroyed = true;
 	}
-	else if (type == INVISIBLE) {
-		type = SOLID;
-		SetTexture(ResourceManager::GetTexture("destroyed_solid"));
-	}
-	else if (type == SOLID) {
+	else if (type == SOLID || type == HIDDEN || type == INVISIBLE) {
 		animated = false;
+		type = SOLID;
 		SetTexture(ResourceManager::GetTexture("destroyed_solid"));
 	}
 	else if (type == MONEY) {
 		isMoving = true;
 		if (coins > 0) coins--;
-		else SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+		else {
+			type = SOLID;
+			SetTexture(ResourceManager::GetTexture("destroyed_solid"));
+		}
 	}
 }

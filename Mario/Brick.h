@@ -7,7 +7,8 @@ enum BrickType {
 	COMMON,
 	SOLID,
 	INVISIBLE,
-	MONEY
+	MONEY,
+	HIDDEN
 };
 
 enum BrickBonus {
@@ -29,13 +30,13 @@ public:
 
 		if (position.y > 900.0f) underGround = true;
 
-		if (type == COMMON || type == MONEY) {
+		if (type == COMMON || type == MONEY || type == HIDDEN) {
 			if (underGround) SetTexture(ResourceManager::GetTexture("underbrick"));
 			else SetTexture(ResourceManager::GetTexture("brick"));
 		}
 		else if (type == INVISIBLE) SetTexture(ResourceManager::GetTexture("test"));
 
-		if (type == MONEY) bonus = BONUS_COIN;
+		if (type == MONEY) this->bonus = BONUS_COIN;
 	};
 
 	// animations
@@ -51,6 +52,8 @@ public:
 	BrickBonus GetBonusType() { return this->bonus; }
 	bool IsMoving() { return isMoving; }
 	bool IsDestroyed() { return destroyed; }
+
+	void PickBonus() { this->bonus = BONUS_NONE; }
 
 	virtual ~Brick() {}
 

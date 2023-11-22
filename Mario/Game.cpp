@@ -137,7 +137,14 @@ void Game::LoadResources()
 
     ResourceManager::LoadTexture("plant/mushroom_upgrade.png", true, "mushroom_upgrade");
     ResourceManager::LoadTexture("plant/mushroom_life.png", true, "mushroom_life");
+
+    // - stars
+    ResourceManager::LoadTexture("star/star_0.png", true, "star_0");
+    ResourceManager::LoadTexture("star/star_1.png", true, "star_1");
+    ResourceManager::LoadTexture("star/star_2.png", true, "star_2");
+    ResourceManager::LoadTexture("star/star_3.png", true, "star_3");
 }
+
 // Actions
 void Game::ProcessInput(float dt)
 {
@@ -271,6 +278,12 @@ void Game::MoveObjects(float dt)
         if (!i->IsSprouted()) i->Sprout(dt);
         else if (i->IsSprouted() && (i->GetPlantType() == MUSHROOM_LIFE || i->GetPlantType() == MUSHROOM_UPGRADE)) i->Move(dt);
     }
+
+    for (auto i : stars)
+    {
+        if (!i->IsSprouted()) i->Sprout(dt);
+        else i->Move(dt);
+    }
 }
 
 void Game::ProcessCollision(float dt)
@@ -296,6 +309,8 @@ void Game::ProcessCollision(float dt)
     {
         if (player->ProcessTopCollision(*i)) {
             i->Push(player->GetMarioType() > LITTLE);
+            SpawnBonus(i);
+            if (!(i->GetType() == MONEY)) i->PickBonus();
             break;
         }
     }
@@ -320,6 +335,28 @@ void Game::ProcessCollision(float dt)
             }
         }
     }
+
+    for (auto i : plants)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i->ProcessSideCollision(*j) && i->IsSprouted()) {
+                i->GetDirection() == DIR_RIGHT ? i->SetDirection(DIR_LEFT) : i->SetDirection(DIR_RIGHT);
+                break;
+            }
+        }
+    }
+
+    for (auto i : stars)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i->ProcessSideCollision(*j) && i->IsSprouted()) {
+                i->GetDirection() == DIR_RIGHT ? i->SetDirection(DIR_LEFT) : i->SetDirection(DIR_RIGHT);
+                break;
+            }
+        }
+    }
 }
 
 void Game::ProcessAnimation(float dt)
@@ -331,8 +368,13 @@ void Game::ProcessAnimation(float dt)
 
     for (auto i : bricks)
     {
-        if (i->GetType() == COMMON && i->IsMoving()) i->Move(dt);
+        if (i->IsMoving()) i->Move(dt);
         else if (i->GetType() == COMMON && i->IsDestroyed()) i->DestroyAnimation(dt);
+    }
+
+    for (auto i : coins) 
+    {
+        if (i->GetCoinType() == COIN_BRICK) i->FlipAnimation();
     }
 }
 
@@ -344,22 +386,27 @@ void Game::Render()
     DrawStats();
     
     // objects
+    for (auto i : plants)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+
+    for (auto i : coins)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+
+    for (auto i : stars)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+
     for (auto i : bricks)
     {
         if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
     
-    for (auto i : coins)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-    
     for (auto i : bullets)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    for (auto i : plants)
     {
         if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
@@ -597,13 +644,17 @@ void Game::InitBricks()
     animatedObj.push_back(brick);
     objList.push_back(brick);
 
-    brick = new Brick(glm::vec2(2210.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
+    brick = new Brick(glm::vec2(2210.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, BONUS_COIN, true);
     bricks.push_back(brick);
     animatedObj.push_back(brick);
     objList.push_back(brick);
 
     for (size_t i = 0; i < 5; i++)
     {
+        if (i == 1) bonus = BONUS_UPGRADE;
+        else if (i == 3) bonus = BONUS_COIN;
+        else bonus = BONUS_NONE;
+
         if (i == 1 || i == 3) type = SOLID;
         else type = COMMON;
 
@@ -613,12 +664,16 @@ void Game::InitBricks()
         if (type == SOLID) animatedObj.push_back(brick);
     }
 
-    brick = new Brick(glm::vec2(6430.0f, 462.0f), glm::vec2(102.0f, 65.0f), INVISIBLE);
+    brick = new Brick(glm::vec2(6430.0f, 462.0f), glm::vec2(102.0f, 65.0f), INVISIBLE, BONUS_LIFE);
     bricks.push_back(brick);
     objList.push_back(brick);
 
     for (size_t i = 0; i < 15; i++)
     {
+        if (i == 1) bonus = BONUS_UPGRADE;
+        else if (i == 14) bonus = BONUS_COIN;
+        else bonus = BONUS_NONE;
+
         if (i == 1 || i == 14) type = SOLID;
         else type = COMMON;
 
@@ -631,31 +686,34 @@ void Game::InitBricks()
         if (type == SOLID) animatedObj.push_back(brick);
     }
 
-    brick = new Brick(glm::vec2(9445.0f, 525.0f), glm::vec2(102.0f, 65.0f), COMMON);
+    brick = new Brick(glm::vec2(9445.0f, 525.0f), glm::vec2(102.0f, 65.0f), MONEY);
     bricks.push_back(brick);
     objList.push_back(brick);
 
     for (size_t i = 0; i < 2; i++)
     {
-        brick = new Brick(glm::vec2(10045.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), COMMON);
+        if (i == 1) type = HIDDEN, bonus = BONUS_STAR;
+        else type = COMMON, bonus = BONUS_NONE;
+
+        brick = new Brick(glm::vec2(10045.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type, bonus);
         bricks.push_back(brick);
         objList.push_back(brick);
     }
 
     for (size_t i = 0; i < 3; i++)
     {
-        brick = new Brick(glm::vec2(10650.0f + 300.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
+        brick = new Brick(glm::vec2(10650.0f + 300.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, BONUS_COIN, true);
         bricks.push_back(brick);
         objList.push_back(brick);
         animatedObj.push_back(brick);
     }
 
-    brick = new Brick(glm::vec2(10950.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
+    brick = new Brick(glm::vec2(10950.0f, 267.0f), glm::vec2(102.0f, 65.0f), SOLID, BONUS_UPGRADE, true);
     bricks.push_back(brick);
     objList.push_back(brick);
     animatedObj.push_back(brick);
 
-    brick = new Brick(glm::vec2(11860.0f, 525.0f), glm::vec2(102.0f, 65.0f), SOLID, bonus, true);
+    brick = new Brick(glm::vec2(11860.0f, 525.0f), glm::vec2(102.0f, 65.0f));
     bricks.push_back(brick);
     objList.push_back(brick);
     animatedObj.push_back(brick);
@@ -664,8 +722,8 @@ void Game::InitBricks()
     for (size_t i = 0; i < 7; ++i)
     {
         if (i == 3) addWidth = 400.0f;
-        if (i == 4 || i == 5) type = SOLID;
-        else type = COMMON;
+        if (i == 4 || i == 5) type = SOLID, bonus = BONUS_COIN;
+        else type = COMMON, bonus = BONUS_NONE;
 
         brick = new Brick(glm::vec2(12155.0f + 102.0f * i + addWidth, 267.0f), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         bricks.push_back(brick);
@@ -675,15 +733,15 @@ void Game::InitBricks()
 
     for (size_t i = 0; i < 2; ++i)
     {
-        brick = new Brick(glm::vec2(12960.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), COMMON);
+        brick = new Brick(glm::vec2(12960.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f));
         bricks.push_back(brick);
         objList.push_back(brick);
     }
 
     for (size_t i = 0; i < 4; ++i)
     {
-        if (i == 2) type = SOLID;
-        else type = COMMON;
+        if (i == 2) type = SOLID, bonus = BONUS_COIN;
+        else type = COMMON, bonus = BONUS_NONE;
 
         brick = new Brick(glm::vec2(16880.0f + 102.0f * i, 525.0f), glm::vec2(102.0f, 65.0f), type, bonus, type == SOLID);
         bricks.push_back(brick);
@@ -694,7 +752,7 @@ void Game::InitBricks()
     // underworld
     for (size_t i = 0; i < 7; i++)
     {
-        brick = new Brick(glm::vec2(398.0f + 102.0f * i, this->height + 121.0f), glm::vec2(102.0f, 65.0f), COMMON);
+        brick = new Brick(glm::vec2(398.0f + 102.0f * i, this->height + 121.0f), glm::vec2(102.0f, 65.0f));
         bricks.push_back(brick);
         objList.push_back(brick);
     }
@@ -719,18 +777,44 @@ void Game::InitCoins()
    
 }
 
+void Game::SpawnBonus(Brick* brick)
+{
+    if (brick->GetBonusType() == BONUS_NONE) return;
+
+    if (brick->GetBonusType() == BONUS_COIN) SpawnCoin(brick);
+    else if (brick->GetBonusType() == BONUS_LIFE || brick->GetBonusType() == BONUS_UPGRADE) SpawnPlant(brick);
+    else if (brick->GetBonusType() == BONUS_STAR) SpawnStar(brick);
+}
+
 void Game::SpawnPlant(Brick* brick)
 {
-    PlantType type = MUSHROOM_UPGRADE;
+    PlantType type;
     if (brick->GetBonusType() == BONUS_UPGRADE) type = MUSHROOM_UPGRADE;
     else if (brick->GetBonusType() == BONUS_UPGRADE && player->GetMarioType() > LITTLE) type = PLANT_UPGRADE;
     else if (brick->GetBonusType() == BONUS_LIFE) type = MUSHROOM_LIFE;
 
-    Plant* plant = new Plant(brick->GetPos(), brick->GetSize(), type, type == PLANT_UPGRADE);
+    Plant* plant = new Plant(brick->GetPos(), brick->GetSize(), type, type == PLANT_UPGRADE, 250.0f);
     objList.push_back(plant);
     if (type == MUSHROOM_LIFE || type == MUSHROOM_UPGRADE) moveableObj.push_back(plant);
     else if (type == PLANT_UPGRADE) animatedObj.push_back(plant);
     plants.push_back(plant);
+}
+
+void Game::SpawnStar(Brick* brick)
+{
+    Star* star = new Star(brick->GetPos(), brick->GetSize(), true);
+    objList.push_back(star);
+    animatedObj.push_back(star);
+    moveableObj.push_back(star);
+    stars.push_back(star);
+}
+
+void Game::SpawnCoin(Brick* brick)
+{
+    Coin* coin = new Coin(brick->GetPos() + brick->GetSize() / 4.0f, brick->GetSize() / 2.0f);
+    coin->SetCoinType(COIN_BRICK);
+    objList.push_back(coin);
+    coins.push_back(coin);
 }
 // - - - - - - - - - - - - - - -
 
@@ -743,6 +827,8 @@ void Game::DeleteObjects()
     DeleteObjectFromVector(coins, false);
     DeleteObjectFromVector(bricks, false);
     DeleteObjectFromVector(bullets, false);
+    DeleteObjectFromVector(plants, false);
+    DeleteObjectFromVector(stars, false);
 
     DeleteObjectFromVector(objList, true);
 }
@@ -785,5 +871,6 @@ Game::~Game()
     bricks.clear();
     coins.clear();
     bullets.clear();
+    plants.clear();
     // ---------
 }

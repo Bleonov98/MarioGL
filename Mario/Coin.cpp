@@ -30,8 +30,8 @@ void Coin::Move(float dt)
 {
 	if (coinType == COIN_REGULAR) return;
 
-	if (position.y > position.y - size.y && !reached) position.y -= speed * dt; // go to top
-	else if (position.y <= position.y - size.y) reached = true; // on top
+	if (position.y > startPos.y - size.y * 3.0f && !reached) position.y -= speed * dt; // go to top
+	else if (position.y <= startPos.y - size.y && !reached) reached = true; // on top
 	else if (position.y <= startPos.y && reached) position.y += speed * dt; // go to bot
 	else if (position.y >= startPos.y && reached) DeleteObject(); // delete when back to start position
 }

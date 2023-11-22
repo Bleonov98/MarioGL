@@ -14,6 +14,7 @@
 #include "Mario.h"
 #include "Bullet.h"
 #include "Plant.h"
+#include "Star.h"
 
 enum GameState {
 	MENU,
@@ -97,6 +98,7 @@ private:
 	std::vector<Coin*> coins;
 	std::vector<Bullet*> bullets;
 	std::vector<Plant*> plants;
+	std::vector<Star*> stars;
 
 	int width, height;
 	bool toggle = false;

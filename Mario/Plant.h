@@ -17,6 +17,11 @@ public:
 	{
 		this->plantType = type;
 		this->startPos = position;
+		this->direction = DIR_RIGHT;
+
+		if (type == MUSHROOM_UPGRADE) SetTexture(ResourceManager::GetTexture("mushroom_upgrade"));
+		else if (type == MUSHROOM_LIFE) SetTexture(ResourceManager::GetTexture("mushroom_life"));
+		else SetTexture(ResourceManager::GetTexture("plant_0"));
 	};
 
 	void Sprout(float dt);
