@@ -71,6 +71,8 @@ public:
 	void SpawnStar(Brick* brick);
 	void SpawnCoin(Brick* brick);
 
+	void SpawnGoomba();
+
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
@@ -99,6 +101,7 @@ private:
 	std::vector<Bullet*> bullets;
 	std::vector<Plant*> plants;
 	std::vector<Star*> stars;
+	std::vector<Person*> enemies;
 
 	int width, height;
 	bool toggle = false;

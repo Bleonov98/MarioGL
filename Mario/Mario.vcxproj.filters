@@ -49,6 +49,9 @@
     <ClCompile Include="Star.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Goomba.cpp">
+      <Filter>source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -97,6 +100,9 @@
       <Filter>headers</Filter>
     </ClInclude>
     <ClInclude Include="Star.h">
+      <Filter>headers</Filter>
+    </ClInclude>
+    <ClInclude Include="Goomba.h">
       <Filter>headers</Filter>
     </ClInclude>
   </ItemGroup>

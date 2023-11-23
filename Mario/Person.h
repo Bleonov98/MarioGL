@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
+#ifndef PERSON_H
+#define PERSON_H
 
 #include "DynamicObject.h"
 
@@ -11,7 +11,7 @@ public:
 	virtual void PlayAnimation() = 0;
 
 	void Death() { isDead = true; }
-	virtual void DeathAnimation(glm::vec2 screenPos, float height) = 0;
+	virtual void DeathAnimation(float dt, glm::vec2 screenPos, float height) = 0;
 
 	bool IsDead() { return isDead; }
 
@@ -21,4 +21,4 @@ private:
 
 };
 
-#endif // !CHARACTER_H
+#endif // !PERSON_H

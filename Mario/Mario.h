@@ -39,7 +39,7 @@ public:
 	float GetInertia() { return this->inertia; }
 
 	void PlayAnimation() override;
-	void DeathAnimation(glm::vec2 screenPos, float height) override;
+	void DeathAnimation(float dt, glm::vec2 screenPos, float height) override;
 
 	bool ProcessTopCollision(GameObject& two);
 

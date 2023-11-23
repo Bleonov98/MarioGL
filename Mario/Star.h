@@ -1,9 +1,11 @@
-#pragma once
+#ifndef STAR_H
+#define STAR_H
+
 #include "DynamicObject.h"
 class Star : public DynamicObject
 {
 public:
-	Star(glm::vec2 position, glm::vec2 size, bool animated, float speed = 400.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, animated, speed, angle, color) 
+	Star(glm::vec2 position, glm::vec2 size, bool animated, float speed = 400.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, animated, speed, angle, color)
 	{
 		this->startPos = position;
 		this->direction = DIR_RIGHT;
@@ -15,7 +17,7 @@ public:
 
 	void Sprout(float dt);
 	bool IsSprouted() { return isSprouted; }
-	
+
 	void Move(float dt);
 
 private:
@@ -26,3 +28,5 @@ private:
 
 };
 
+
+#endif // !STAR_H

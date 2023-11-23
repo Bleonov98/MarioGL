@@ -143,6 +143,19 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("star/star_1.png", true, "star_1");
     ResourceManager::LoadTexture("star/star_2.png", true, "star_2");
     ResourceManager::LoadTexture("star/star_3.png", true, "star_3");
+    
+    // - enemies
+    ResourceManager::LoadTexture("goomba/goomba_0.png", true, "goomba_0");
+    ResourceManager::LoadTexture("goomba/goomba_1.png", true, "goomba_1");
+    ResourceManager::LoadTexture("goomba/goomba_death.png", true, "goomba_death");
+
+    ResourceManager::LoadTexture("turtle/turtle_left_0.png", true, "turtle_left_0");
+    ResourceManager::LoadTexture("turtle/turtle_left_1.png", true, "turtle_left_1");
+
+    ResourceManager::LoadTexture("turtle/turtle_right_0.png", true, "turtle_right_0");
+    ResourceManager::LoadTexture("turtle/turtle_right_1.png", true, "turtle_right_1");
+
+    ResourceManager::LoadTexture("turtle/turtle_hidden.png", true, "turtle_hidden");
 }
 
 // Actions

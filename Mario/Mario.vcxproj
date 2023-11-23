@@ -140,6 +140,7 @@
     <ClCompile Include="Coin.cpp" />
     <ClCompile Include="DynamicObject.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Goomba.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Mario.cpp" />
     <ClCompile Include="Plant.cpp" />
@@ -154,6 +155,7 @@
     <ClInclude Include="AABB.h" />
     <ClInclude Include="Brick.h" />
     <ClInclude Include="Bullet.h" />
+    <ClInclude Include="Goomba.h" />
     <ClInclude Include="Plant.h" />
     <ClInclude Include="Person.h" />
     <ClInclude Include="Coin.h" />
