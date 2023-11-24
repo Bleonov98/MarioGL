@@ -42,6 +42,7 @@ void Game::Init()
 
     // game objects
     InitLevelObjects();
+    SpawnEnemies();
 }
 
 void Game::LoadResources()
@@ -297,6 +298,11 @@ void Game::MoveObjects(float dt)
         if (!i->IsSprouted()) i->Sprout(dt);
         else i->Move(dt);
     }
+    
+    for (auto i : goombas)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->Move(dt);
+    }
 }
 
 void Game::ProcessCollision(float dt)
@@ -370,6 +376,34 @@ void Game::ProcessCollision(float dt)
             }
         }
     }
+
+    for (auto i : enemies)
+    {
+        for (auto j : groundObjects)
+        {
+            if (i->ProcessSideCollision(*j)) {
+                i->GetDirection() == DIR_RIGHT ? i->SetDirection(DIR_LEFT) : i->SetDirection(DIR_RIGHT);
+                break;
+            }
+        }
+    }
+
+    // enemies with player collisions
+    for (auto i : enemies)
+    {
+        if (player->ProcessSideCollision(*i)) {
+            player->Death();
+            break;
+        }
+    }
+
+    for (auto i : goombas)
+    {
+        if (player->ProcessKillCollision(*i)) {
+            i->Death();
+            break;
+        }
+    }
 }
 
 void Game::ProcessAnimation(float dt)
@@ -389,6 +423,13 @@ void Game::ProcessAnimation(float dt)
     {
         if (i->GetCoinType() == COIN_BRICK) i->FlipAnimation();
     }
+
+    for (auto i : enemies)
+    {
+        if (i->IsDead()) i->DeathAnimation(dt, camera.cameraPos, this->height);
+    }
+
+    if (player->IsDead()) player->DeathAnimation(dt, camera.cameraPos, this->height);
 }
 
 // Render
@@ -420,6 +461,11 @@ void Game::Render()
     }
     
     for (auto i : bullets)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+    }
+
+    for (auto i : enemies)
     {
         if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
@@ -828,6 +874,38 @@ void Game::SpawnCoin(Brick* brick)
     coin->SetCoinType(COIN_BRICK);
     objList.push_back(coin);
     coins.push_back(coin);
+}
+
+void Game::SpawnEnemies()
+{
+    // goombas
+    SpawnGoomba(glm::vec2(2100.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(4200.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(5300.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(5420.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(8100.0f, 200.0f));
+    SpawnGoomba(glm::vec2(8220.0f, 200.0f));
+    SpawnGoomba(glm::vec2(9500.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(9620.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(12400.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(12520.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(12700.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(12820.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(17400.0f, this->height - 250.0f));
+    SpawnGoomba(glm::vec2(17520.0f, this->height - 250.0f));
+
+    // turtles
+}
+
+void Game::SpawnGoomba(glm::vec2 position)
+{
+    Goomba* goomba = new Goomba(position, player->GetSize(), true, 125.0f);
+    objList.push_back(goomba);
+    moveableObj.push_back(goomba);
+    animatedObj.push_back(goomba);
+    
+    enemies.push_back(goomba);
+    goombas.push_back(goomba);
 }
 // - - - - - - - - - - - - - - -
 

@@ -13,7 +13,12 @@ void Goomba::PlayAnimation()
 	if (animToggle) frame--;
 	else frame++;
 
-	if (frame == 0 || frame == 1) animToggle = !animToggle; // change from 0 to 2 and back 
+	if (frame == 0 || frame == 1) animToggle = !animToggle; // change from 0 to 1 and back 
+}
+
+void Goomba::Death()
+{
+	isDead = true;
 }
 
 void Goomba::DeathAnimation(float dt, glm::vec2 screenPos, float height)

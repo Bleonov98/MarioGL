@@ -52,6 +52,7 @@
     <ClCompile Include="Goomba.cpp">
       <Filter>source</Filter>
     </ClCompile>
+    <ClCompile Include="Turtle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AABB.h">
@@ -105,6 +106,7 @@
     <ClInclude Include="Goomba.h">
       <Filter>headers</Filter>
     </ClInclude>
+    <ClInclude Include="Turtle.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\shaders\fShader.ft">

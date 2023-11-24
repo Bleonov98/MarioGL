@@ -39,9 +39,12 @@ public:
 	float GetInertia() { return this->inertia; }
 
 	void PlayAnimation() override;
+	
+	void Death() override;
 	void DeathAnimation(float dt, glm::vec2 screenPos, float height) override;
 
 	bool ProcessTopCollision(GameObject& two);
+	bool ProcessKillCollision(GameObject& two);
 
 	// types and actions
 	std::string GetSprite();

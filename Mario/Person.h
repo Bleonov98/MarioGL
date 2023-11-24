@@ -6,16 +6,16 @@
 class Person : public DynamicObject
 {
 public:
-	Person(glm::vec2 position, glm::vec2 size, float speed, bool animated = false, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, speed, animated, angle, color) {};
+	Person(glm::vec2 position, glm::vec2 size, bool animated = false, float speed = 100.0f, float angle = 0.0f, glm::vec3 color = glm::vec3(1.0f)) : DynamicObject(position, size, animated, speed, angle, color) {};
 
 	virtual void PlayAnimation() = 0;
 
-	void Death() { isDead = true; }
+	virtual void Death() = 0;
 	virtual void DeathAnimation(float dt, glm::vec2 screenPos, float height) = 0;
 
 	bool IsDead() { return isDead; }
 
-private:
+protected:
 
 	bool isDead = false;
 

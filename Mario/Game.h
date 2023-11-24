@@ -9,12 +9,15 @@
 
 #include "GameObject.h"
 #include "DynamicObject.h"
+
 #include "Brick.h"
 #include "Coin.h"
-#include "Mario.h"
 #include "Bullet.h"
 #include "Plant.h"
 #include "Star.h"
+
+#include "Mario.h"
+#include "Goomba.h"
 
 enum GameState {
 	MENU,
@@ -71,7 +74,9 @@ public:
 	void SpawnStar(Brick* brick);
 	void SpawnCoin(Brick* brick);
 
-	void SpawnGoomba();
+	void SpawnEnemies();
+	void SpawnGoomba(glm::vec2 position);
+	void SpawnTurtle(glm::vec2 position);
 
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
@@ -101,7 +106,9 @@ private:
 	std::vector<Bullet*> bullets;
 	std::vector<Plant*> plants;
 	std::vector<Star*> stars;
+
 	std::vector<Person*> enemies;
+	std::vector<Goomba*> goombas;
 
 	int width, height;
 	bool toggle = false;
