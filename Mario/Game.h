@@ -18,6 +18,7 @@
 
 #include "Mario.h"
 #include "Goomba.h"
+#include "Turtle.h"
 
 enum GameState {
 	MENU,
@@ -109,6 +110,7 @@ private:
 
 	std::vector<Person*> enemies;
 	std::vector<Goomba*> goombas;
+	std::vector<Turtle*> turtles;
 
 	int width, height;
 	bool toggle = false;

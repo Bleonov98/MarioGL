@@ -2,17 +2,16 @@
 
 void Turtle::Move(float dt)
 {
-	if (!hidden) {
-		if (direction == DIR_LEFT) position.x -= speed * dt;
-		else if (direction == DIR_RIGHT) position.x += speed * dt;
-	}
+	if (direction == DIR_LEFT) position.x -= speed * dt;
+	else if (direction == DIR_RIGHT) position.x += speed * dt;
 }
 
 void Turtle::Hide()
 {
 	SetTexture(ResourceManager::GetTexture("turtle_hidden"));
-	StopAnimation();
+	StopAnimation(); 
 	hidden = true;
+	direction = STAND;
 }
 
 void Turtle::PlayAnimation()
@@ -41,11 +40,9 @@ void Turtle::PlayAnimation()
 void Turtle::Death()
 {
 	isDead = true;
+	skipCollision = true;
+	isOnGround = false;
+
 	angle = 180.0f;
-
-	position.y -= 10.0f;
-}
-
-void Turtle::DeathAnimation(float dt, glm::vec2 screenPos, float height)
-{
+	vertSpeed = -400.0f;
 }

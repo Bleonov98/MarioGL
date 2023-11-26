@@ -14,7 +14,7 @@ public:
 	void PlayAnimation() override;
 
 	void Death() override;
-	void DeathAnimation(float dt, glm::vec2 screenPos, float height) override;
+	void DeathAnimation(float dt);
 
 private:
 

@@ -89,6 +89,8 @@ void Game::LoadResources()
 
     ResourceManager::LoadTexture("mario/lil/mario_left_jump.png", true, "mario_left_jump");
     ResourceManager::LoadTexture("mario/lil/mario_right_jump.png", true, "mario_right_jump");
+
+    ResourceManager::LoadTexture("mario/lil/mario_death.png", true, "mario_death");
     // - big Mario
     ResourceManager::LoadTexture("mario/big/big_left_stand.png", true, "big_left_stand");
     ResourceManager::LoadTexture("mario/big/big_right_stand.png", true, "big_right_stand");
@@ -301,7 +303,12 @@ void Game::MoveObjects(float dt)
     
     for (auto i : goombas)
     {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->Move(dt);
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)) && !i->IsDead()) i->Move(dt);
+    }
+
+    for (auto i : turtles)
+    {
+        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)) && !i->IsDead()) i->Move(dt);
     }
 }
 
@@ -355,6 +362,7 @@ void Game::ProcessCollision(float dt)
         }
     }
 
+    // side collisions behaviour
     for (auto i : plants)
     {
         for (auto j : groundObjects)
@@ -389,10 +397,21 @@ void Game::ProcessCollision(float dt)
     }
 
     // enemies with player collisions
+    for (auto i : bullets)
+    {
+        for (auto j : enemies)
+        {
+            if (i->ObjectCollision(*j)) {
+                j->Death();
+                i->DeleteObject();
+            }
+        }
+    }
+
     for (auto i : enemies)
     {
-        if (player->ProcessSideCollision(*i)) {
-            player->Death();
+        if (player->ProcessTopCollision(*i) && !i->IsDead()) {
+            player->Hit();
             break;
         }
     }
@@ -403,7 +422,26 @@ void Game::ProcessCollision(float dt)
             i->Death();
             break;
         }
+        else if (player->ProcessSideCollision(*i)) {
+            player->Death();
+            break;
+        }
     }
+
+    for (auto i : turtles)
+    {
+        if (player->ProcessKillCollision(*i)) {
+            i->Hide();
+            break;
+        }
+        else if (player->ProcessSideCollision(*i)) {
+            if (!i->IsHidden() || i->GetDirection() != STAND) player->Death();
+            else i->SetDirection(player->GetLastDirection());
+            break;
+        }
+    }
+
+    // items collisions
 }
 
 void Game::ProcessAnimation(float dt)
@@ -424,12 +462,10 @@ void Game::ProcessAnimation(float dt)
         if (i->GetCoinType() == COIN_BRICK) i->FlipAnimation();
     }
 
-    for (auto i : enemies)
+    for (auto i : goombas)
     {
-        if (i->IsDead()) i->DeathAnimation(dt, camera.cameraPos, this->height);
+        if (i->IsDead()) i->DeathAnimation(dt);
     }
-
-    if (player->IsDead()) player->DeathAnimation(dt, camera.cameraPos, this->height);
 }
 
 // Render
@@ -895,6 +931,7 @@ void Game::SpawnEnemies()
     SpawnGoomba(glm::vec2(17520.0f, this->height - 250.0f));
 
     // turtles
+    SpawnTurtle(glm::vec2(10620.0f, this->height - 250.0f));
 }
 
 void Game::SpawnGoomba(glm::vec2 position)
@@ -906,6 +943,17 @@ void Game::SpawnGoomba(glm::vec2 position)
     
     enemies.push_back(goomba);
     goombas.push_back(goomba);
+}
+
+void Game::SpawnTurtle(glm::vec2 position)
+{
+    Turtle* turtle = new Turtle(position, player->GetSize(), true, 125.0f);
+    objList.push_back(turtle);
+    moveableObj.push_back(turtle);
+    animatedObj.push_back(turtle);
+
+    enemies.push_back(turtle);
+    turtles.push_back(turtle);
 }
 // - - - - - - - - - - - - - - -
 
@@ -920,6 +968,10 @@ void Game::DeleteObjects()
     DeleteObjectFromVector(bullets, false);
     DeleteObjectFromVector(plants, false);
     DeleteObjectFromVector(stars, false);
+
+    DeleteObjectFromVector(enemies, false);
+    DeleteObjectFromVector(goombas, false);
+    DeleteObjectFromVector(turtles, false);
 
     DeleteObjectFromVector(objList, true);
 }

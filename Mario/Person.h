@@ -11,7 +11,6 @@ public:
 	virtual void PlayAnimation() = 0;
 
 	virtual void Death() = 0;
-	virtual void DeathAnimation(float dt, glm::vec2 screenPos, float height) = 0;
 
 	bool IsDead() { return isDead; }
 

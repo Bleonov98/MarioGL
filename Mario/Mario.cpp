@@ -85,17 +85,20 @@ void Mario::PlayAnimation()
 	if (frame == 0 || frame == 2) animToggle = !animToggle; // change from 0 to 2 and back
 }
 
-void Mario::Death()
+void Mario::Death() 
 {
-}
+	SetTexture(ResourceManager::GetTexture("mario_death"));
+	isDead = true;
+	skipCollision = true;
+	isOnGround = false;
 
-void Mario::DeathAnimation(float dt, glm::vec2 screenPos, float height)
-{
-
+	vertSpeed = -jumpStrength / 2.0f;
 }
 
 bool Mario::ProcessTopCollision(GameObject& two)
 {
+	if (skipCollision) return false;
+
 	if (TopCollision(two) && vertSpeed < 0.0f) {
 		vertSpeed = 250.0f;
 		return true;
@@ -105,6 +108,8 @@ bool Mario::ProcessTopCollision(GameObject& two)
 
 bool Mario::ProcessKillCollision(GameObject& two)
 {
+	if (skipCollision) return false;
+
 	if (GroundCollision(two) && vertSpeed >= 0) {
 		vertSpeed = -jumpStrength / 2.0f;
 		return true;

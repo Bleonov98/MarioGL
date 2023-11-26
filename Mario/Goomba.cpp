@@ -21,12 +21,15 @@ void Goomba::Death()
 	isDead = true;
 }
 
-void Goomba::DeathAnimation(float dt, glm::vec2 screenPos, float height)
+void Goomba::DeathAnimation(float dt)
 {
 	if (!textureChanged) {
+		StopAnimation();
 		SetTexture(ResourceManager::GetTexture("goomba_death"));
 		textureChanged = true;
+		animationTime = 0.0f;
 	}
-
-	position.y += speed * dt;
+	
+	animationTime += dt;
+	if (animationTime >= 0.20f) DeleteObject();
 }

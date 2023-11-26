@@ -11,11 +11,11 @@ public:
 
 	void Move(float dt);
 	void Hide();
+	bool IsHidden() { return this->hidden; }
 
 	void PlayAnimation() override;
 
 	void Death() override;
-	void DeathAnimation(float dt, glm::vec2 screenPos, float height) override;
 
 private:
 
