@@ -9,7 +9,7 @@ public:
 		SetTexture(ResourceManager::GetTexture("goomba_0"));
 	};
 
-	void Move(float dt);
+	void Move(float dt, bool appear);
 
 	void PlayAnimation() override;
 

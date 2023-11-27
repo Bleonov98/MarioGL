@@ -1,7 +1,12 @@
 #include "Turtle.h"
 
-void Turtle::Move(float dt)
+void Turtle::Move(float dt, bool appear)
 {
+	if (!isAppear) {
+		isAppear = appear;
+		return;
+	}
+
 	if (direction == DIR_LEFT) position.x -= speed * dt;
 	else if (direction == DIR_RIGHT) position.x += speed * dt;
 }
@@ -11,6 +16,7 @@ void Turtle::Hide()
 	SetTexture(ResourceManager::GetTexture("turtle_hidden"));
 	StopAnimation(); 
 	hidden = true;
+	speed += 400.0f;
 	direction = STAND;
 }
 

@@ -9,7 +9,7 @@ public:
 		SetTexture(ResourceManager::GetTexture("turtle_left_0"));
 	};
 
-	void Move(float dt);
+	void Move(float dt, bool appear);
 	void Hide();
 	bool IsHidden() { return this->hidden; }
 

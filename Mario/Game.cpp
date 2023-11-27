@@ -303,12 +303,12 @@ void Game::MoveObjects(float dt)
     
     for (auto i : goombas)
     {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)) && !i->IsDead()) i->Move(dt);
+        if (!i->IsDead()) i->Move(dt, i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)));
     }
 
     for (auto i : turtles)
     {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)) && !i->IsDead()) i->Move(dt);
+        if (!i->IsDead()) i->Move(dt, i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height)));
     }
 }
 
@@ -438,6 +438,14 @@ void Game::ProcessCollision(float dt)
             if (!i->IsHidden() || i->GetDirection() != STAND) player->Death();
             else i->SetDirection(player->GetLastDirection());
             break;
+        }
+    }
+
+    for (auto i : turtles)
+    {
+        for (auto j : goombas)
+        {
+            if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) j->DeleteObject();
         }
     }
 

@@ -12,11 +12,12 @@ public:
 
 	virtual void Death() = 0;
 
-	bool IsDead() { return isDead; }
+	bool IsDead() { return this->isDead; }
+	bool IsAppear() { return this->isAppear; }
 
 protected:
 
-	bool isDead = false;
+	bool isDead = false, isAppear = false;;
 
 };
 

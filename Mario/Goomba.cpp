@@ -1,7 +1,12 @@
 #include "Goomba.h"
 
-void Goomba::Move(float dt)
+void Goomba::Move(float dt, bool appear)
 {
+	if (!isAppear) {
+		isAppear = appear;
+		return;
+	}
+
 	if (direction == DIR_LEFT) position.x -= speed * dt;
 	else if (direction == DIR_RIGHT) position.x += speed * dt;
 }
