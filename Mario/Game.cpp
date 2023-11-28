@@ -36,7 +36,7 @@ void Game::Init()
     map = new GameObject(glm::vec2(0.0f), glm::vec2(21200.0f, this->height));
     map->SetTexture(ResourceManager::GetTexture("MainMap"));
     // 
-    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(70.0f), 150.0f, false, 0.0f, glm::vec3(0.9f));
+    player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(60.0f, 70.0f), 125.0f, false, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
 
@@ -167,9 +167,9 @@ void Game::ProcessInput(float dt)
     if (gmState == ACTIVE) {
 
         // Player movement
-        if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, DIR_RIGHT);
+        if (this->Keys[GLFW_KEY_DOWN]) player->Action(dt, DUCK);
+        else if (this->Keys[GLFW_KEY_RIGHT]) player->Action(dt, DIR_RIGHT);
         else if (this->Keys[GLFW_KEY_LEFT] && player->GetPos().x > camera.cameraPos.x) player->Action(dt, DIR_LEFT);
-        else if (this->Keys[GLFW_KEY_DOWN] && player->IsOnGround()) player->Action(dt, DUCK);
         else player->Action(dt, STAND);
 
         // Acceleration
@@ -408,34 +408,48 @@ void Game::ProcessCollision(float dt)
         }
     }
 
-    for (auto i : enemies)
+    for (auto i : enemies) // if enemies fall on mario's head mario dies (if he isn't immortal)
     {
+        if (i->IsDead()) break;
+
         if (player->ProcessTopCollision(*i) && !i->IsDead()) {
-            player->Hit();
+            if (!player->IsImmortal()) player->Hit();
+            else i->Death();
             break;
         }
     }
 
     for (auto i : goombas)
     {
+        if (i->IsDead()) break;
+
         if (player->ProcessKillCollision(*i)) {
             i->Death();
             break;
         }
         else if (player->ProcessSideCollision(*i)) {
-            player->Death();
+            if (!player->IsImmortal()) player->Hit();
+            else i->Death();
             break;
         }
     }
 
     for (auto i : turtles)
     {
-        if (player->ProcessKillCollision(*i)) {
+        if (i->IsDead()) break;
+
+        if (player->ProcessKillCollision(*i)) { // top collision
             i->Hide();
             break;
         }
         else if (player->ProcessSideCollision(*i)) {
-            if (!i->IsHidden() || i->GetDirection() != STAND) player->Death();
+
+            if (player->IsImmortal()) {
+                i->Death(); // if mario's immortal turtle dies 
+                break;
+            }
+            
+            if (!i->IsHidden() || i->GetDirection() != STAND) player->Hit();
             else i->SetDirection(player->GetLastDirection());
             break;
         }
@@ -445,11 +459,39 @@ void Game::ProcessCollision(float dt)
     {
         for (auto j : goombas)
         {
-            if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) j->DeleteObject();
+            if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) j->DeleteObject(); // if goombas haven't appeared they can't die
         }
     }
 
-    // items collisions
+    // gameplay collisions
+    for (auto i : coins)
+    {
+        if (player->ObjectCollision(*i)) {
+            player->CollectCoin();
+            i->DeleteObject();
+            break;
+        }
+    }
+
+    for (auto i : plants)
+    {
+        if (player->ObjectCollision(*i) && i->IsSprouted()) {
+            if (i->GetPlantType() == MUSHROOM_LIFE) player->CollectLife();
+            else player->Upgrade();
+
+            i->DeleteObject();
+            break;
+        }
+    }
+
+    for (auto i : stars)
+    {
+        if (player->ObjectCollision(*i)) {
+            player->Immortal();
+            i->DeleteObject();
+            break;
+        }
+    }
 }
 
 void Game::ProcessAnimation(float dt)
@@ -479,6 +521,7 @@ void Game::ProcessAnimation(float dt)
 // Render
 void Game::Render()
 {
+    static int tick = 0;
     // background/map/stats
     DrawObject(map);
     DrawStats();
@@ -514,9 +557,14 @@ void Game::Render()
         if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
     }
 
-    DrawObject(player);
+    if (player->HitDelay()) {
+        if (tick % 2 == 0) DrawObject(player);
+    }
+    else DrawObject(player);
 
     if (gmState != ACTIVE) Menu();
+
+    tick++;
 }
 
 void Game::DrawObject(GameObject* obj)
@@ -892,14 +940,14 @@ void Game::SpawnBonus(Brick* brick)
 void Game::SpawnPlant(Brick* brick)
 {
     PlantType type;
-    if (brick->GetBonusType() == BONUS_UPGRADE) type = MUSHROOM_UPGRADE;
+    if (brick->GetBonusType() == BONUS_UPGRADE && player->GetMarioType() == LITTLE) type = MUSHROOM_UPGRADE;
     else if (brick->GetBonusType() == BONUS_UPGRADE && player->GetMarioType() > LITTLE) type = PLANT_UPGRADE;
     else if (brick->GetBonusType() == BONUS_LIFE) type = MUSHROOM_LIFE;
 
     Plant* plant = new Plant(brick->GetPos(), brick->GetSize(), type, type == PLANT_UPGRADE, 250.0f);
     objList.push_back(plant);
-    if (type == MUSHROOM_LIFE || type == MUSHROOM_UPGRADE) moveableObj.push_back(plant);
-    else if (type == PLANT_UPGRADE) animatedObj.push_back(plant);
+    moveableObj.push_back(plant);
+    if (type == PLANT_UPGRADE) animatedObj.push_back(plant);
     plants.push_back(plant);
 }
 
@@ -962,6 +1010,10 @@ void Game::SpawnTurtle(glm::vec2 position)
 
     enemies.push_back(turtle);
     turtles.push_back(turtle);
+}
+
+void Game::GoTube()
+{
 }
 // - - - - - - - - - - - - - - -
 

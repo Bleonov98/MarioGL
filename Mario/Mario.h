@@ -20,8 +20,16 @@ public:
 
 	// items interactions
 	void CollectCoin();
+	void CollectLife() { this->life++; }
+	void Upgrade();
+	void Hit();
+	void Immortal();
+
 	int GetCoins() { return this->coins; }
 	int GetScore() { return this->score; }
+	int GetLifes() { return this->life; }
+	bool HitDelay() { return this->hitDelay; }
+	bool IsImmortal() { return this->isImmortal; }
 
 	// movement, animation
 	void Action(float dt, MoveDirection direction);
@@ -39,7 +47,7 @@ public:
 	float GetInertia() { return this->inertia; }
 
 	void PlayAnimation() override;
-	
+
 	void Death() override;
 
 	bool ProcessTopCollision(GameObject& two);
@@ -48,20 +56,17 @@ public:
 	// types and actions
 	std::string GetSprite();
 	int GetMarioType() { return this->type; }
-
-	void Upgrade();
-	void Hit();
 	
 private:
 
 	std::string marioType;
 	glm::vec2 startSize;
 
-	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 2;
-	float inertia = 0.0f, jumpStrength = 780.0f, startSpeed;
+	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 0;
+	float inertia = 0.0f, jumpStrength = 800.0f, startSpeed;
 
 	MoveDirection lastDir = DIR_RIGHT;
-	bool restartAnim = false;
+	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false;
 };
 
 #endif // !MARIO_H

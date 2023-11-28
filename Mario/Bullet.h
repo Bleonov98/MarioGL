@@ -20,7 +20,7 @@ public:
 private:
 
 	int bounceCnt = 2;
-	float bounceStrength = 500.0f;
+	float bounceStrength = 400.0f;
 
 };
 

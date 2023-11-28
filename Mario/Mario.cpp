@@ -6,12 +6,30 @@ void Mario::Action(float dt, MoveDirection direction)
 	if (lastDir != direction) restartAnim = true;
 	else restartAnim = false;
 
-	if (direction == STAND || (direction == DUCK && type >= BIG)) {
+	if (direction != DUCK && ducked) {
+		ducked = false;
+
+		float prevSizeY = size.y;
+		size.y *= 1.6f;
+		position.y -= size.y - prevSizeY;
+	}
+
+	if (direction == STAND || direction == DUCK) {
 		const std::string standDirection = (lastDir == DIR_RIGHT) ? "_right_stand" : "_left_stand";
 		const std::string duckDirection = (lastDir == DIR_RIGHT) ? "_right_duck" : "_left_duck";
 		
 		if (direction == STAND && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + standDirection));
-		else if (direction == DUCK && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection)); // -> add resize
+		else if (direction == DUCK && isOnGround && type >= BIG) {
+			SetTexture(ResourceManager::GetTexture(GetSprite() + duckDirection));
+
+			if (!ducked) {
+				ducked = true;
+				
+				float prevSizeY = size.y;
+				size.y /= 1.6f;
+				position.y -= size.y - prevSizeY;
+			}
+		}
 
 		if (inertia > 0.0f) {
 			inertia -= 1.1f;
@@ -70,7 +88,7 @@ void Mario::Reload(std::vector<Bullet*> bullets)
 
 // animations - - - - - - - - - - - - - - - - - - - - - - -
 void Mario::PlayAnimation()
-{
+{	
 	if (!restartAnim && lastDir == DIR_LEFT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_" + std::to_string(frame)));
 	else if (!restartAnim && lastDir == DIR_RIGHT && isOnGround) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_" + std::to_string(frame)));
 	else if (restartAnim) {
@@ -123,20 +141,47 @@ void Mario::Upgrade()
 	score += 1000;
 
 	if (type == LITTLE) {
-		size.y *= 2.0f;
+
+		float prevSizeY = size.y;
+		size.y *= 1.6f;
+		position.y -= size.y - prevSizeY;
+
 		type++;
 	}
-	else if (type == BIG) type++;
-	else if (type == CHIEF) ammo = 2;
+	else if (type == BIG) type++, ammo = 2;
 }
 
 void Mario::Hit()
 {
+	if (hitDelay) return;
+
 	if (type == LITTLE) Death();
 	else {
 		type = LITTLE;
 		ammo = 0;
+		size.y /= 1.6f;
+
+		hitDelay = true;
+		std::thread hitDelayTimer([&]()
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			this->hitDelay = false;
+		});
+		hitDelayTimer.detach();
 	}
+}
+
+void Mario::Immortal()
+{
+	isImmortal = true;
+	this->color = glm::vec3(1.0f, 0.5f, 0.5f);
+
+	std::thread immortalDelay([&]() {
+		std::this_thread::sleep_for(std::chrono::seconds(10));
+		this->color = glm::vec3(1.0f);
+		isImmortal = false;
+	});
+	immortalDelay.detach();
 }
 
 void Mario::CollectCoin()

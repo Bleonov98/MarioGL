@@ -24,6 +24,7 @@ void Goomba::PlayAnimation()
 void Goomba::Death()
 {
 	isDead = true;
+	skipCollision = true;
 }
 
 void Goomba::DeathAnimation(float dt)
