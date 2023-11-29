@@ -205,36 +205,11 @@ void Game::ProcessInput(float dt)
 
         if (this->Keys[GLFW_KEY_P]) gmState = PAUSED;
         
-        // Temp - - - - - - - - - - - - - - - - -
-        if (this->Keys[GLFW_KEY_L] && !this->KeysProcessed[GLFW_KEY_L]) {
-             
-            toggle = !toggle;
-            this->KeysProcessed[GLFW_KEY_L] = true;
-
-            sound->stopAllSoundsOfSoundSource(music);
-
-            if (toggle) {
-                map->SetSize(glm::vec2(this->width, this->height));
-                map->SetPos(glm::vec2(0.0f, this->height));
-                map->SetTexture(ResourceManager::GetTexture("UndergroundMap"));
-
-                music = sound->getSoundSource("../sounds/underworld.mp3");
-
-                camera.savePos = camera.cameraPos;
-                camera.cameraPos = glm::vec3(0.0f, this->height, 1.0f);
-            }
-            else {
-                map->SetSize(glm::vec2(21200.0f, this->height));
-                map->SetPos(glm::vec2(0.0f));
-                map->SetTexture(ResourceManager::GetTexture("MainMap"));
-
-                music = sound->getSoundSource("../sounds/overworld.mp3");
-
-                camera.cameraPos = camera.savePos;
-            }
-
-            sound->play2D(music, true);
+        for (auto i : tubes)
+        {
+            if (this->Keys[GLFW_KEY_DOWN] && i->IsActive() && player->GroundCollision(*i)) GoTube();
         }
+
     }
     else { // - - - - - - - - MENU OR PAUSE
         if (this->Keys[GLFW_KEY_UP] && !this->KeysProcessed[GLFW_KEY_UP] && cursorPos.y > this->height / 2.0f) {
@@ -486,7 +461,7 @@ void Game::ProcessCollision(float dt)
 
     for (auto i : stars)
     {
-        if (player->ObjectCollision(*i)) {
+        if (player->ObjectCollision(*i) && i->IsSprouted()) {
             player->Immortal();
             i->DeleteObject();
             break;
@@ -762,7 +737,7 @@ void Game::InitTubes()
     tubes.push_back(tube);
     objList.push_back(tube);
 
-    tube = new Tube(glm::vec2(5730.0f, this->height - 370.0f), glm::vec2(190.0f, 260.0f));
+    tube = new Tube(glm::vec2(5730.0f, this->height - 370.0f), glm::vec2(190.0f, 260.0f), true);
     tube->SetTexture(ResourceManager::GetTexture("test"));
     tubes.push_back(tube);
     objList.push_back(tube);
@@ -778,7 +753,7 @@ void Game::InitTubes()
     objList.push_back(tube);
 
     // underworld
-    tube = new Tube(glm::vec2(this->width - 300.0f, this->height * 2 - 180.0f), glm::vec2(300.0f, 125.0f));
+    tube = new Tube(glm::vec2(this->width - 300.0f, this->height * 2 - 180.0f), glm::vec2(300.0f, 125.0f), true);
     tube->SetTexture(ResourceManager::GetTexture("test"));
     tubes.push_back(tube);
     objList.push_back(tube);
@@ -1014,6 +989,31 @@ void Game::SpawnTurtle(glm::vec2 position)
 
 void Game::GoTube()
 {
+    sound->stopAllSoundsOfSoundSource(music);
+
+    if (!underworld) {
+        map->SetSize(glm::vec2(this->width, this->height));
+        map->SetPos(glm::vec2(0.0f, this->height));
+        map->SetTexture(ResourceManager::GetTexture("UndergroundMap"));
+
+        music = sound->getSoundSource("../sounds/underworld.mp3");
+
+        camera.savePos = camera.cameraPos;
+        camera.cameraPos = glm::vec3(0.0f, this->height, 1.0f);
+
+        player->SetPos(glm::vec2(10.0f, this->height + 15.0f));
+    }
+    else {
+        map->SetSize(glm::vec2(21200.0f, this->height));
+        map->SetPos(glm::vec2(0.0f));
+        map->SetTexture(ResourceManager::GetTexture("MainMap"));
+
+        music = sound->getSoundSource("../sounds/overworld.mp3");
+
+        camera.cameraPos = camera.savePos;
+    }
+
+    sound->play2D(music, true);
 }
 // - - - - - - - - - - - - - - -
 

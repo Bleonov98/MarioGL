@@ -114,7 +114,7 @@ private:
 	std::vector<Turtle*> turtles;
 
 	int width, height;
-	bool toggle = false;
+	bool underworld = false;
 	glm::vec2 cursorPos;
 
 	GameState gmState = MENU;
