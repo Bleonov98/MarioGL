@@ -48,6 +48,10 @@ public:
 
 	void PlayAnimation() override;
 
+	void TubeAnimation(float dt, bool& underworld, glm::vec2 tubePos);
+	void GoTube() { goTube = true, skipCollision = true; }
+	bool IsGoingTube() { return goTube; }
+
 	void Death() override;
 
 	bool ProcessTopCollision(GameObject& two);
@@ -66,7 +70,7 @@ private:
 	float inertia = 0.0f, jumpStrength = 800.0f, startSpeed;
 
 	MoveDirection lastDir = DIR_RIGHT;
-	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false;
+	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false, goTube = false;
 };
 
 #endif // !MARIO_H

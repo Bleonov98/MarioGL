@@ -205,10 +205,8 @@ void Game::ProcessInput(float dt)
 
         if (this->Keys[GLFW_KEY_P]) gmState = PAUSED;
         
-        for (auto i : tubes)
-        {
-            if (this->Keys[GLFW_KEY_DOWN] && i->IsActive() && player->GroundCollision(*i)) GoTube();
-        }
+        if (this->Keys[GLFW_KEY_DOWN] && player->GroundCollision(*tubes[3])) player->GoTube();
+        else if (this->Keys[GLFW_KEY_RIGHT] && player->RightCollision(*tubes[6])) player->GoTube();
 
     }
     else { // - - - - - - - - MENU OR PAUSE
@@ -491,6 +489,9 @@ void Game::ProcessAnimation(float dt)
     {
         if (i->IsDead()) i->DeathAnimation(dt);
     }
+
+    if (player->IsGoingTube() && !underworld) player->TubeAnimation(dt, underworld, tubes[3]->GetPos());
+    else if (player->IsGoingTube() && underworld) player->TubeAnimation(dt, underworld, tubes[6]->GetPos());
 }
 
 // Render
@@ -987,13 +988,13 @@ void Game::SpawnTurtle(glm::vec2 position)
     turtles.push_back(turtle);
 }
 
-void Game::GoTube()
+void Game::ChangeLocation()
 {
     sound->stopAllSoundsOfSoundSource(music);
 
-    if (!underworld) {
+    if (!underworld && !player->IsGoingTube()) {
         map->SetSize(glm::vec2(this->width, this->height));
-        map->SetPos(glm::vec2(0.0f, this->height));
+        map->SetPos(glm::vec2(00.0f, this->height));
         map->SetTexture(ResourceManager::GetTexture("UndergroundMap"));
 
         music = sound->getSoundSource("../sounds/underworld.mp3");
@@ -1001,7 +1002,7 @@ void Game::GoTube()
         camera.savePos = camera.cameraPos;
         camera.cameraPos = glm::vec3(0.0f, this->height, 1.0f);
 
-        player->SetPos(glm::vec2(10.0f, this->height + 15.0f));
+        player->SetPos(glm::vec2(150.0f, this->height + 15.0f));
     }
     else {
         map->SetSize(glm::vec2(21200.0f, this->height));
@@ -1011,6 +1012,8 @@ void Game::GoTube()
         music = sound->getSoundSource("../sounds/overworld.mp3");
 
         camera.cameraPos = camera.savePos;
+
+        player->SetPos(glm::vec2(tubes[4]->GetPos().x + tubes[4]->GetSize().x / 2.0f, tubes[4]->GetPos().y));
     }
 
     sound->play2D(music, true);

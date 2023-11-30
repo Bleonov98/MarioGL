@@ -79,7 +79,7 @@ public:
 	void SpawnGoomba(glm::vec2 position);
 	void SpawnTurtle(glm::vec2 position);
 
-	void GoTube();
+	void ChangeLocation();
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
