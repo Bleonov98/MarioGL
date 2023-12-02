@@ -10,6 +10,7 @@ ISoundSource* music;
 
 GameObject* map;
 Mario* player;
+Coin* menuCoin;
 
  // Loading
 void Game::Init()
@@ -39,6 +40,10 @@ void Game::Init()
     player = new Mario(glm::vec2(100.0f, this->height - 500.0f), glm::vec2(60.0f, 70.0f), 125.0f, false, 0.0f, glm::vec3(0.9f));
     player->SetTexture(ResourceManager::GetTexture("mario_right_stand"));
     moveableObj.push_back(player);
+
+    menuCoin = new Coin(glm::vec2(515.0f, 48.0f), glm::vec2(30.0f), true);
+    menuCoin->SetCoinType(COIN_MENU);
+    animatedObj.push_back(menuCoin);
 
     // game objects
     InitLevelObjects();
@@ -74,6 +79,10 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("coin/flip_coin_0.png", true, "flip_coin_0");
     ResourceManager::LoadTexture("coin/flip_coin_1.png", true, "flip_coin_1");
     ResourceManager::LoadTexture("coin/flip_coin_2.png", true, "flip_coin_2");
+
+    ResourceManager::LoadTexture("coin/menu_coin_0.png", true, "menu_coin_0");
+    ResourceManager::LoadTexture("coin/menu_coin_1.png", true, "menu_coin_1");
+    ResourceManager::LoadTexture("coin/menu_coin_2.png", true, "menu_coin_2");
     // - mario
         // - lil Mario
     ResourceManager::LoadTexture("mario/lil/mario_left_stand.png", true, "mario_left_stand");
@@ -161,6 +170,23 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("turtle/turtle_hidden.png", true, "turtle_hidden");
 }
 
+void Game::Respawn()
+{
+    for (auto i : objList)
+    {
+        i->DeleteObject();
+    }
+
+    // game objects
+    InitLevelObjects();
+    SpawnEnemies();
+
+    player->Spawn();
+
+    camera.cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+    camera.savePos = glm::vec3(0.0f);
+}
+
 // Actions
 void Game::ProcessInput(float dt)
 {
@@ -205,8 +231,8 @@ void Game::ProcessInput(float dt)
 
         if (this->Keys[GLFW_KEY_P]) gmState = PAUSED;
         
-        if (this->Keys[GLFW_KEY_DOWN] && player->GroundCollision(*tubes[3])) player->GoTube();
-        else if (this->Keys[GLFW_KEY_RIGHT] && player->RightCollision(*tubes[6])) player->GoTube();
+        if (this->Keys[GLFW_KEY_DOWN] && player->GroundCollision(*tubes[3])) ChangeLocation();
+        else if (this->Keys[GLFW_KEY_RIGHT] && player->RightCollision(*tubes[6])) ChangeLocation();
 
     }
     else { // - - - - - - - - MENU OR PAUSE
@@ -244,6 +270,25 @@ void Game::Update(float dt)
         ProcessCollision(dt);
         
         player->Reload(bullets); // bullets are deleted after collision
+
+        if (player->GetPos().y >= this->height && !underworld) {
+
+            player->Death();
+
+            if (player->GetLifes() > 0) {
+                std::thread spawnTimer([&]() {
+                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    respawnCheck = true;
+                });
+                spawnTimer.detach();
+            }
+
+        }
+
+        if (respawnCheck) {
+            Respawn();
+            respawnCheck = false;
+        }
 
         // delete
         DeleteObjects();
@@ -375,6 +420,7 @@ void Game::ProcessCollision(float dt)
         for (auto j : enemies)
         {
             if (i->ObjectCollision(*j)) {
+                player->AddScore(500);
                 j->Death();
                 i->DeleteObject();
             }
@@ -387,7 +433,10 @@ void Game::ProcessCollision(float dt)
 
         if (player->ProcessTopCollision(*i) && !i->IsDead()) {
             if (!player->IsImmortal()) player->Hit();
-            else i->Death();
+            else { 
+                i->Death();
+                player->AddScore(500);
+            }
             break;
         }
     }
@@ -398,11 +447,15 @@ void Game::ProcessCollision(float dt)
 
         if (player->ProcessKillCollision(*i)) {
             i->Death();
+            player->AddScore(100);
             break;
         }
         else if (player->ProcessSideCollision(*i)) {
             if (!player->IsImmortal()) player->Hit();
-            else i->Death();
+            else {
+                i->Death();
+                player->AddScore(100);
+            }
             break;
         }
     }
@@ -418,6 +471,7 @@ void Game::ProcessCollision(float dt)
         else if (player->ProcessSideCollision(*i)) {
 
             if (player->IsImmortal()) {
+                player->AddScore(500);
                 i->Death(); // if mario's immortal turtle dies 
                 break;
             }
@@ -432,7 +486,10 @@ void Game::ProcessCollision(float dt)
     {
         for (auto j : goombas)
         {
-            if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) j->DeleteObject(); // if goombas haven't appeared they can't die
+            if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) {  // if goombas haven't appeared they can't die
+                player->AddScore(100);
+                j->DeleteObject();
+            }
         }
     }
 
@@ -471,7 +528,7 @@ void Game::ProcessAnimation(float dt)
 {
     for (auto i : animatedObj)
     {
-        if (i->IsAnimated() && i->AnimationPlayed(dt) && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) i->PlayAnimation();
+        if (i->IsAnimated() && i->AnimationPlayed(dt)) i->PlayAnimation();
     }
 
     for (auto i : bricks)
@@ -489,9 +546,6 @@ void Game::ProcessAnimation(float dt)
     {
         if (i->IsDead()) i->DeathAnimation(dt);
     }
-
-    if (player->IsGoingTube() && !underworld) player->TubeAnimation(dt, underworld, tubes[3]->GetPos());
-    else if (player->IsGoingTube() && underworld) player->TubeAnimation(dt, underworld, tubes[6]->GetPos());
 }
 
 // Render
@@ -539,6 +593,7 @@ void Game::Render()
     else DrawObject(player);
 
     if (gmState != ACTIVE) Menu();
+    DrawObject(menuCoin);
 
     tick++;
 }
@@ -576,14 +631,15 @@ void Game::DrawStats()
     if (gmState != ACTIVE) color = glm::vec3(0.5f);
 
     text->RenderText("M A R I O", glm::vec2(150.0f, 20.0f), 1.25f, color);
-    text->RenderText("0 0 0 0 0 0", glm::vec2(150.0f, 50.0f), 1.25f, color);
+    text->RenderText(std::to_string(player->GetScore()), glm::vec2(150.0f, 50.0f), 1.25f, color);
     
-    
-    text->RenderText("x 0 0", glm::vec2(550.0f, 50.0f), 1.25f, color);
+    text->RenderText("x ", glm::vec2(550.0f, 50.0f), 1.25f, color);
+    text->RenderText(std::to_string(player->GetCoins()), glm::vec2(580.0f, 50.0f), 1.25f, color);
 
     text->RenderText("T I M E", glm::vec2(this->width - 200.0f, 20.0f), 1.25f, color);
     text->RenderText("0 0 0", glm::vec2(this->width - 180.0f, 50.0f), 1.25f, color);
 
+    menuCoin->SetPos(glm::vec2(camera.cameraPos.x + 515.0f, 48.0f));
 
     text->RenderText(std::to_string(camera.cameraPos.x), glm::vec2(this->width - 180.0f, 100.0f), 1.0f, color);
 }
@@ -942,6 +998,8 @@ void Game::SpawnCoin(Brick* brick)
     coin->SetCoinType(COIN_BRICK);
     objList.push_back(coin);
     coins.push_back(coin);
+
+    player->CollectCoin();
 }
 
 void Game::SpawnEnemies()
@@ -992,7 +1050,7 @@ void Game::ChangeLocation()
 {
     sound->stopAllSoundsOfSoundSource(music);
 
-    if (!underworld && !player->IsGoingTube()) {
+    if (!underworld) {
         map->SetSize(glm::vec2(this->width, this->height));
         map->SetPos(glm::vec2(00.0f, this->height));
         map->SetTexture(ResourceManager::GetTexture("UndergroundMap"));
@@ -1003,6 +1061,8 @@ void Game::ChangeLocation()
         camera.cameraPos = glm::vec3(0.0f, this->height, 1.0f);
 
         player->SetPos(glm::vec2(150.0f, this->height + 15.0f));
+
+        underworld = true;
     }
     else {
         map->SetSize(glm::vec2(21200.0f, this->height));
@@ -1013,7 +1073,7 @@ void Game::ChangeLocation()
 
         camera.cameraPos = camera.savePos;
 
-        player->SetPos(glm::vec2(tubes[4]->GetPos().x + tubes[4]->GetSize().x / 2.0f, tubes[4]->GetPos().y));
+        player->SetPos(glm::vec2(tubes[4]->GetPos().x + tubes[4]->GetSize().x / 2.0f, tubes[4]->GetPos().y - player->GetSize().y));
     }
 
     sound->play2D(music, true);

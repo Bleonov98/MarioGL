@@ -5,7 +5,8 @@
 
 enum CoinType {
 	COIN_REGULAR,
-	COIN_BRICK
+	COIN_BRICK,
+	COIN_MENU
 };
 
 class Coin : public DynamicObject

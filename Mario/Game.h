@@ -80,6 +80,7 @@ public:
 	void SpawnTurtle(glm::vec2 position);
 
 	void ChangeLocation();
+	void Respawn();
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
@@ -114,7 +115,7 @@ private:
 	std::vector<Turtle*> turtles;
 
 	int width, height;
-	bool underworld = false;
+	bool underworld = false, respawnCheck = false;
 	glm::vec2 cursorPos;
 
 	GameState gmState = MENU;

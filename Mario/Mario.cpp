@@ -3,6 +3,8 @@
 // actions - - - - - - - - - - - - - - - - - - - -
 void Mario::Action(float dt, MoveDirection direction)
 {
+	if (isDead) return;
+
 	if (lastDir != direction) restartAnim = true;
 	else restartAnim = false;
 
@@ -103,25 +105,26 @@ void Mario::PlayAnimation()
 	if (frame == 0 || frame == 2) animToggle = !animToggle; // change from 0 to 2 and back
 }
 
-void Mario::TubeAnimation(float dt, bool& underworld, glm::vec2 tubePos)
-{
-	if (!underworld && position.y <= tubePos.y) position.y += speed * dt;
-	else if (!underworld && position.y > tubePos.y + size.y) {
-		underworld = true;
-		goTube = false;
-		skipCollision = false;
-	}
-	else if (underworld && position.y <= tubePos.y - size.y) position.y -= speed * dt;
-}
-
 void Mario::Death() 
 {
+	if (isDead) return;
+
 	SetTexture(ResourceManager::GetTexture("mario_death"));
+	life--;
 	isDead = true;
 	skipCollision = true;
 	isOnGround = false;
 
-	vertSpeed = -jumpStrength / 2.0f;
+	vertSpeed = -jumpStrength;
+}
+
+void Mario::Spawn()
+{
+	position = glm::vec2(100.0f, 600.0f);
+
+	isDead = false;
+	skipCollision = false;
+	vertSpeed = 0.0f;
 }
 
 bool Mario::ProcessTopCollision(GameObject& two)
@@ -197,6 +200,7 @@ void Mario::Immortal()
 
 void Mario::CollectCoin()
 {
+	score += 200;
 	if (coins >= 100) life++, coins = 0;
 	else coins++;
 }

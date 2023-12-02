@@ -20,7 +20,8 @@ public:
 
 	// items interactions
 	void CollectCoin();
-	void CollectLife() { this->life++; }
+	void CollectLife() { this->life++, score += 1000; }
+	void AddScore(int score) { this->score += score; }
 	void Upgrade();
 	void Hit();
 	void Immortal();
@@ -48,11 +49,8 @@ public:
 
 	void PlayAnimation() override;
 
-	void TubeAnimation(float dt, bool& underworld, glm::vec2 tubePos);
-	void GoTube() { goTube = true, skipCollision = true; }
-	bool IsGoingTube() { return goTube; }
-
 	void Death() override;
+	void Spawn();
 
 	bool ProcessTopCollision(GameObject& two);
 	bool ProcessKillCollision(GameObject& two);
@@ -67,10 +65,10 @@ private:
 	glm::vec2 startSize;
 
 	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 0;
-	float inertia = 0.0f, jumpStrength = 800.0f, startSpeed;
+	float inertia = 0.0f, jumpStrength = 900.0f, startSpeed;
 
 	MoveDirection lastDir = DIR_RIGHT;
-	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false, goTube = false;
+	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false;
 };
 
 #endif // !MARIO_H

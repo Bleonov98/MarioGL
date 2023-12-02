@@ -1,10 +1,10 @@
 #include "DynamicObject.h"
 
-void DynamicObject::Drop(float dt)
+void DynamicObject::Drop(float dt) 
 {
 	if (isOnGround) vertSpeed = 0.0f;
 	else {
-		if (vertSpeed <= 1500.0f) vertSpeed += gravity;
+		if (vertSpeed <= 1900.0f) vertSpeed += gravity;
 		position.y += vertSpeed * dt;
 	}
 }

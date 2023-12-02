@@ -2,7 +2,8 @@
 
 void Coin::PlayAnimation()
 {
-	SetTexture(ResourceManager::GetTexture("coin_" + std::to_string(frame)));
+	if (coinType == COIN_MENU) SetTexture(ResourceManager::GetTexture("menu_coin_" + std::to_string(frame)));
+	else SetTexture(ResourceManager::GetTexture("coin_" + std::to_string(frame)));
 
 	if (animToggle) frame--;
 	else frame++;
