@@ -20,10 +20,13 @@
 #include "Goomba.h"
 #include "Turtle.h"
 
+#include <ctime>
+
 enum GameState {
 	MENU,
 	ACTIVE,
-	PAUSED
+	WIN,
+	LOSS
 };
 
 struct Camera {
@@ -52,7 +55,7 @@ public:
 	void DrawObject(GameObject* obj);
 	void DrawStats();
 
-	//void Restart();
+	void Timer();
 	
 	// resources
 	void LoadResources();
@@ -81,6 +84,9 @@ public:
 
 	void ChangeLocation();
 	void Respawn();
+	void ProcessPlayersDeath();
+	void ClearGameData();
+	
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;
 	
@@ -114,9 +120,11 @@ private:
 	std::vector<Goomba*> goombas;
 	std::vector<Turtle*> turtles;
 
-	int width, height;
-	bool underworld = false, respawnCheck = false;
+	int width, height, timeCount = 100;
+	bool underworld = false, respawnCheck = false, deadOnce = false;
 	glm::vec2 cursorPos;
+
+	float seconds = 0.0f;
 
 	GameState gmState = MENU;
 };

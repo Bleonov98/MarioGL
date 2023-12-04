@@ -124,6 +124,7 @@ void Mario::Spawn()
 
 	isDead = false;
 	skipCollision = false;
+	isOnGround = false;
 	vertSpeed = 0.0f;
 }
 

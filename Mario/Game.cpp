@@ -9,8 +9,9 @@ ISoundEngine* sound = irrklang::createIrrKlangDevice();
 ISoundSource* music;
 
 GameObject* map;
-Mario* player;
 Coin* menuCoin;
+
+Mario* player;
 
  // Loading
 void Game::Init()
@@ -168,23 +169,43 @@ void Game::LoadResources()
     ResourceManager::LoadTexture("turtle/turtle_right_1.png", true, "turtle_right_1");
 
     ResourceManager::LoadTexture("turtle/turtle_hidden.png", true, "turtle_hidden");
+
+    // - flag
+    ResourceManager::LoadTexture("flag/flag.png", true, "flag");
 }
 
 void Game::Respawn()
+{
+    // game objects
+    InitLevelObjects();
+    SpawnEnemies();
+
+    camera.cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+    camera.savePos = glm::vec3(0.0f);
+}
+
+void Game::ProcessPlayersDeath()
+{
+    ClearGameData();
+
+    player->Spawn();
+
+    Respawn();
+
+    deadOnce = false;
+    respawnCheck = false;
+
+    timeCount = 100;
+}
+
+void Game::ClearGameData()
 {
     for (auto i : objList)
     {
         i->DeleteObject();
     }
 
-    // game objects
-    InitLevelObjects();
-    SpawnEnemies();
-
-    player->Spawn();
-
-    camera.cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
-    camera.savePos = glm::vec3(0.0f);
+    DeleteObjects();
 }
 
 // Actions
@@ -227,9 +248,9 @@ void Game::ProcessInput(float dt)
         
         // Move screen
         float midScreenX = camera.cameraPos.x + this->width / 2.0f;
-        if (player->GetPos().x > midScreenX) camera.cameraPos.x += player->GetPos().x - midScreenX;
+        if (player->GetPos().x > midScreenX && !underworld) camera.cameraPos.x += player->GetPos().x - midScreenX;
 
-        if (this->Keys[GLFW_KEY_P]) gmState = PAUSED;
+        if (this->Keys[GLFW_KEY_P]) gmState = MENU;
         
         if (this->Keys[GLFW_KEY_DOWN] && player->GroundCollision(*tubes[3])) ChangeLocation();
         else if (this->Keys[GLFW_KEY_RIGHT] && player->RightCollision(*tubes[6])) ChangeLocation();
@@ -268,31 +289,43 @@ void Game::Update(float dt)
 
         // interactions
         ProcessCollision(dt);
-        
+
+        if (timeCount == 0) player->Death();
+
+        if (player->IsDead() && player->GetLifes() > 0 && !deadOnce) {
+            deadOnce = true;
+            std::thread respawnTh([&]() {
+                std::this_thread::sleep_for(std::chrono::seconds(2));
+                respawnCheck = true;
+                });
+            respawnTh.detach();
+        }
+
         player->Reload(bullets); // bullets are deleted after collision
 
-        if (player->GetPos().y >= this->height && !underworld) {
+        if (player->GetPos().y >= this->height && !underworld && !deadOnce) { // abyss death
 
             player->Death();
 
             if (player->GetLifes() > 0) {
-                std::thread spawnTimer([&]() {
+                deadOnce = true;
+                std::thread respawnTh([&]() {
                     std::this_thread::sleep_for(std::chrono::seconds(2));
                     respawnCheck = true;
-                });
-                spawnTimer.detach();
+                    });
+                respawnTh.detach();
+
             }
-
         }
 
-        if (respawnCheck) {
-            Respawn();
-            respawnCheck = false;
-        }
+        if (respawnCheck) ProcessPlayersDeath();
+        
+        Timer();
 
         // delete
         DeleteObjects();
     }
+    else Menu();
 }
 
 void Game::MoveObjects(float dt)
@@ -522,6 +555,9 @@ void Game::ProcessCollision(float dt)
             break;
         }
     }
+
+    // end game collision
+    // if (player->GetPos().x >= )
 }
 
 void Game::ProcessAnimation(float dt)
@@ -552,47 +588,49 @@ void Game::ProcessAnimation(float dt)
 void Game::Render()
 {
     static int tick = 0;
-    // background/map/stats
-    DrawObject(map);
+
+    if (gmState == ACTIVE) {
+        DrawObject(map);
+
+        // objects
+        for (auto i : plants)
+        {
+            if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        for (auto i : coins)
+        {
+            if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        for (auto i : stars)
+        {
+            if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        for (auto i : bricks)
+        {
+            if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        for (auto i : bullets)
+        {
+            if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        for (auto i : enemies)
+        {
+            if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
+        }
+
+        if (player->HitDelay()) {
+            if (tick % 2 == 0) DrawObject(player);
+        }
+        else DrawObject(player);
+    }
+    else if (gmState == MENU) Menu();
+
     DrawStats();
-    
-    // objects
-    for (auto i : plants)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    for (auto i : coins)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    for (auto i : stars)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    for (auto i : bricks)
-    {
-        if (i->GetType() != INVISIBLE && i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-    
-    for (auto i : bullets)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    for (auto i : enemies)
-    {
-        if (i->IsOnScreen(camera.cameraPos, glm::vec2(this->width, this->height))) DrawObject(i);
-    }
-
-    if (player->HitDelay()) {
-        if (tick % 2 == 0) DrawObject(player);
-    }
-    else DrawObject(player);
-
-    if (gmState != ACTIVE) Menu();
     DrawObject(menuCoin);
 
     tick++;
@@ -636,12 +674,26 @@ void Game::DrawStats()
     text->RenderText("x ", glm::vec2(550.0f, 50.0f), 1.25f, color);
     text->RenderText(std::to_string(player->GetCoins()), glm::vec2(580.0f, 50.0f), 1.25f, color);
 
+    text->RenderText("Lifes: ", glm::vec2(850.0f, 50.0f), 1.25f, color);
+    text->RenderText(std::to_string(player->GetLifes()), glm::vec2(950.0f, 50.0f), 1.25f, color);
+
     text->RenderText("T I M E", glm::vec2(this->width - 200.0f, 20.0f), 1.25f, color);
-    text->RenderText("0 0 0", glm::vec2(this->width - 180.0f, 50.0f), 1.25f, color);
+    text->RenderText(std::to_string(timeCount), glm::vec2(this->width - 150.0f, 50.0f), 1.25f, color);
 
     menuCoin->SetPos(glm::vec2(camera.cameraPos.x + 515.0f, 48.0f));
+}
 
-    text->RenderText(std::to_string(camera.cameraPos.x), glm::vec2(this->width - 180.0f, 100.0f), 1.0f, color);
+void Game::Timer()
+{
+    std::time_t currentTime = std::time(nullptr);
+
+    std::tm timeinfo;
+    localtime_s(&timeinfo, &currentTime);
+
+    float newSeconds = static_cast<float>(timeinfo.tm_sec);
+
+    if (newSeconds > seconds) timeCount--;
+    seconds = newSeconds;
 }
 
 void Game::Menu()
@@ -1061,8 +1113,6 @@ void Game::ChangeLocation()
         camera.cameraPos = glm::vec3(0.0f, this->height, 1.0f);
 
         player->SetPos(glm::vec2(150.0f, this->height + 15.0f));
-
-        underworld = true;
     }
     else {
         map->SetSize(glm::vec2(21200.0f, this->height));
@@ -1076,6 +1126,7 @@ void Game::ChangeLocation()
         player->SetPos(glm::vec2(tubes[4]->GetPos().x + tubes[4]->GetSize().x / 2.0f, tubes[4]->GetPos().y - player->GetSize().y));
     }
 
+    underworld = !underworld;
     sound->play2D(music, true);
 }
 // - - - - - - - - - - - - - - -
@@ -1085,6 +1136,7 @@ void Game::DeleteObjects()
     DeleteObjectFromVector(animatedObj, false);
     DeleteObjectFromVector(moveableObj, false);
 
+    DeleteObjectFromVector(grounds, false);
     DeleteObjectFromVector(tubes, false);
     DeleteObjectFromVector(coins, false);
     DeleteObjectFromVector(bricks, false);
@@ -1119,6 +1171,7 @@ Game::~Game()
     delete sound;
 
     delete map;
+    delete menuCoin;
 
     // objects
     delete player;
@@ -1138,5 +1191,10 @@ Game::~Game()
     coins.clear();
     bullets.clear();
     plants.clear();
+    stars.clear();
+
+    enemies.clear();
+    goombas.clear();
+    turtles.clear();
     // ---------
 }
