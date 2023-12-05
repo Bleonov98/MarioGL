@@ -41,7 +41,7 @@ public:
 protected:
 
 	MoveDirection direction = STAND;
-	float speed, gravity = 2.0f, vertSpeed = 0.0f, animationTime = 0.0f, swapTime = 0.4f;
+	float speed, gravity = 1.2f, vertSpeed = 0.0f, animationTime = 0.0f, swapTime = 0.4f;
 	int frame = 0;
 	bool animToggle = false, isOnGround = false, animated = false, skipCollision = false;
 };

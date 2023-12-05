@@ -66,7 +66,7 @@ private:
 	glm::vec2 startSize;
 
 	int type = LITTLE, coins = 0, life = 3, score = 0, ammo = 0;
-	float inertia = 0.0f, jumpStrength = 900.0f, startSpeed;
+	float inertia = 0.0f, jumpStrength = 1000.0f, startSpeed;
 
 	MoveDirection lastDir = DIR_RIGHT;
 	bool restartAnim = false, isImmortal = false, hitDelay = false, ducked = false;

@@ -22,6 +22,7 @@ void Game::Init()
 
         // sound resources
         music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
+        music = sound->addSoundSourceFromFile("../sounds/star.mp3");
         music = sound->addSoundSourceFromFile("../sounds/overworld.mp3");
         music->setDefaultVolume(0.5f);
 
@@ -270,7 +271,7 @@ void Game::ProcessInput(float dt)
         if (this->Keys[GLFW_KEY_SPACE]) { 
             player->Jump(dt, this->KeysProcessed[GLFW_KEY_SPACE]); 
 
-            if (!this->KeysProcessed[GLFW_KEY_SPACE]) sound->play2D("../sounds/jump.wav");
+            if (player->IsOnGround() && !this->KeysProcessed[GLFW_KEY_SPACE]) sound->play2D("../sounds/jump.wav");
             this->KeysProcessed[GLFW_KEY_SPACE] = true;
         }
 
@@ -286,6 +287,7 @@ void Game::ProcessInput(float dt)
             bullets.push_back(bullet);
 
             this->KeysProcessed[GLFW_KEY_Z] = true;
+            sound->play2D("../sounds/fireball.wav");
         }
 
         // Screen collision
@@ -295,7 +297,10 @@ void Game::ProcessInput(float dt)
         float midScreenX = camera.cameraPos.x + this->width / 2.0f;
         if (player->GetPos().x > midScreenX && !underworld && camera.cameraPos.x + this->width < 21200.0f) camera.cameraPos.x += player->GetPos().x - midScreenX;
 
-        if (this->Keys[GLFW_KEY_P]) gmState = MENU;
+        if (this->Keys[GLFW_KEY_P]) {
+            gmState = MENU;
+            sound->play2D("../sounds/pause.wav");
+        }
         
         if (this->Keys[GLFW_KEY_DOWN] && player->GroundCollision(*tubes[3])) ChangeLocation();
         else if (this->Keys[GLFW_KEY_RIGHT] && player->RightCollision(*tubes[6])) ChangeLocation();
@@ -345,6 +350,9 @@ void Game::Update(float dt)
         if (timeCount == 0) player->Death();
 
         if (player->IsDead() && player->GetLifes() > 0 && !deadOnce) {
+
+            sound->play2D("../sounds/death.wav");
+
             deadOnce = true;
             std::thread respawnTh([&]() {
                 std::this_thread::sleep_for(std::chrono::seconds(5));
@@ -352,12 +360,19 @@ void Game::Update(float dt)
                 });
             respawnTh.detach();
         }
-        else if (player->IsDead() && player->GetLifes() <= 0 && !deadOnce) gmState = LOSS;
+        else if (player->IsDead() && player->GetLifes() <= 0 && !deadOnce) {
+            gmState = LOSS;
+
+            sound->stopAllSoundsOfSoundSource(music);
+            sound->play2D("../sounds/gameover.wav");
+        }
 
             // - - - abyss death
         if (player->GetPos().y >= this->height && !underworld && !deadOnce) { 
 
             player->Death();
+
+            sound->play2D("../sounds/death.wav");
 
             if (player->GetLifes() > 0) {
                 deadOnce = true;
@@ -368,7 +383,12 @@ void Game::Update(float dt)
                 respawnTh.detach();
 
             }
-            else gmState = LOSS;
+            else {
+                gmState = LOSS;
+
+                sound->stopAllSoundsOfSoundSource(music);
+                sound->play2D("../sounds/gameover.wav");
+            }
         }
 
         if (respawnCheck) ProcessPlayersDeath();
@@ -447,6 +467,10 @@ void Game::ProcessCollision(float dt)
             i->Push(player->GetMarioType() > LITTLE);
             SpawnBonus(i);
             if (!(i->GetType() == MONEY)) i->PickBonus();
+
+            if (i->GetType() == COMMON && player->GetMarioType() == LITTLE) sound->play2D("../sounds/push_block.wav");
+            else if (i->GetType() == COMMON && player->GetMarioType() > LITTLE) sound->play2D("../sounds/destroy_block.wav");
+            
             break;
         }
     }
@@ -513,6 +537,7 @@ void Game::ProcessCollision(float dt)
         {
             if (i->ObjectCollision(*j)) {
                 player->AddScore(500);
+                sound->play2D("../sounds/kill.wav");
                 j->Death();
                 i->DeleteObject();
             }
@@ -526,6 +551,7 @@ void Game::ProcessCollision(float dt)
         if (player->ProcessTopCollision(*i) && !i->IsDead()) {
             if (!player->IsImmortal()) player->Hit();
             else { 
+                sound->play2D("../sounds/kill.wav");
                 i->Death();
                 player->AddScore(500);
             }
@@ -538,6 +564,7 @@ void Game::ProcessCollision(float dt)
         if (i->IsDead()) break;
 
         if (player->ProcessKillCollision(*i)) {
+            sound->play2D("../sounds/kill.wav");
             i->Death();
             player->AddScore(100);
             break;
@@ -545,6 +572,7 @@ void Game::ProcessCollision(float dt)
         else if (player->ProcessSideCollision(*i)) {
             if (!player->IsImmortal()) player->Hit();
             else {
+                sound->play2D("../sounds/kill.wav");
                 i->Death();
                 player->AddScore(100);
             }
@@ -563,6 +591,7 @@ void Game::ProcessCollision(float dt)
         else if (player->ProcessSideCollision(*i)) {
 
             if (player->IsImmortal()) {
+                sound->play2D("../sounds/kill.wav");
                 player->AddScore(500);
                 i->Death(); // if mario's immortal turtle dies 
                 break;
@@ -579,6 +608,7 @@ void Game::ProcessCollision(float dt)
         for (auto j : goombas)
         {
             if (j->IsAppear()) if (i->IsHidden() && j->ProcessSideCollision(*i)) {  // if goombas haven't appeared they can't die
+                sound->play2D("../sounds/kill.wav");
                 player->AddScore(100);
                 j->DeleteObject();
             }
@@ -590,6 +620,7 @@ void Game::ProcessCollision(float dt)
     {
         if (player->ObjectCollision(*i)) {
             player->CollectCoin();
+            sound->play2D("../sounds/coin.wav");
             i->DeleteObject();
             break;
         }
@@ -598,9 +629,15 @@ void Game::ProcessCollision(float dt)
     for (auto i : plants)
     {
         if (player->ObjectCollision(*i) && i->IsSprouted()) {
-            if (i->GetPlantType() == MUSHROOM_LIFE) player->CollectLife();
-            else player->Upgrade();
-
+            if (i->GetPlantType() == MUSHROOM_LIFE) {
+                player->CollectLife();
+                sound->play2D("../sounds/life.wav");
+            }
+            else {
+                player->Upgrade();
+                sound->play2D("../sounds/upgrade.wav");
+            }
+            
             i->DeleteObject();
             break;
         }
@@ -616,7 +653,11 @@ void Game::ProcessCollision(float dt)
     }
 
     // end game collision
-    if (player->GetPos().x >= 19880.0f) gmState = WIN;
+    if (player->GetPos().x >= 19880.0f) {
+        sound->stopAllSoundsOfSoundSource(music);
+        sound->play2D("../sounds/win.wav");
+        gmState = WIN;
+    }
 }
 
 void Game::ProcessAnimation(float dt)
@@ -640,6 +681,22 @@ void Game::ProcessAnimation(float dt)
     for (auto i : goombas)
     {
         if (i->IsDead()) i->DeathAnimation(dt);
+    }
+
+    bool static playOnce = false;
+    if (player->IsImmortal() && !playOnce) {
+        sound->stopAllSoundsOfSoundSource(music);
+        music = sound->getSoundSource("../sounds/star.mp3");
+        sound->play2D(music);
+
+        playOnce = true;
+    }
+    else if (!player->IsImmortal() && playOnce) {
+        sound->stopAllSoundsOfSoundSource(music);
+        music = sound->getSoundSource("../sounds/overworld.mp3");
+        sound->play2D(music);
+
+        playOnce = false;
     }
 }
 
@@ -1118,6 +1175,8 @@ void Game::SpawnPlant(Brick* brick)
     moveableObj.push_back(plant);
     if (type == PLANT_UPGRADE) animatedObj.push_back(plant);
     plants.push_back(plant);
+
+    sound->play2D("../sounds/grow_upgrade.wav");
 }
 
 void Game::SpawnStar(Brick* brick)
@@ -1127,6 +1186,8 @@ void Game::SpawnStar(Brick* brick)
     animatedObj.push_back(star);
     moveableObj.push_back(star);
     stars.push_back(star);
+
+    sound->play2D("../sounds/grow_upgrade.wav");
 }
 
 void Game::SpawnCoin(Brick* brick)
@@ -1136,6 +1197,7 @@ void Game::SpawnCoin(Brick* brick)
     objList.push_back(coin);
     coins.push_back(coin);
 
+    sound->play2D("../sounds/coin.wav");
     player->CollectCoin();
 }
 
@@ -1212,6 +1274,8 @@ void Game::ChangeLocation()
     }
 
     underworld = !underworld;
+
+    sound->play2D("../sounds/pipe.wav");
     sound->play2D(music, true);
 }
 // - - - - - - - - - - - - - - -

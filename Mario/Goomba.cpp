@@ -25,6 +25,11 @@ void Goomba::Death()
 {
 	isDead = true;
 	skipCollision = true;
+
+	float displace = size.y;
+	size.y /= 3.0f;
+	displace -= size.y;
+	position.y += displace;
 }
 
 void Goomba::DeathAnimation(float dt)
