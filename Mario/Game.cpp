@@ -16,21 +16,24 @@ Mario* player;
  // Loading
 void Game::Init()
 {
-    LoadResources();
+    if (gmState != LOSS && gmState != WIN) {
+    
+        LoadResources();
 
-    // sound resources
-    music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
-    music = sound->addSoundSourceFromFile("../sounds/overworld.mp3");
-    music->setDefaultVolume(0.5f);
+        // sound resources
+        music = sound->addSoundSourceFromFile("../sounds/underworld.mp3");
+        music = sound->addSoundSourceFromFile("../sounds/overworld.mp3");
+        music->setDefaultVolume(0.5f);
 
-    // tools
-    projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
-    view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.cameraUp);
+        // tools
+        projection = glm::ortho(0.0f, static_cast<float>(this->width), static_cast<float>(this->height), 0.0f, -1.0f, 1.0f);
+        view = glm::lookAt(camera.cameraPos, camera.cameraPos + camera.cameraFront, camera.cameraUp);
 
-    text = new TextRenderer(this->width, this->height);
-    text->Load("../fonts/Teko-Bold.ttf", 32);
+        text = new TextRenderer(this->width, this->height);
+        text->Load("../fonts/Teko-Bold.ttf", 32);
 
-    sound->play2D(music, true);
+        sound->play2D(music, true);
+    }
 
     cursorPos = glm::vec2(this->width / 2.0f - 50.0f, this->height / 2.0f);
 
@@ -57,7 +60,7 @@ void Game::LoadResources()
     ResourceManager::LoadShader("../shaders/vShader.vx", "../shaders/fShader.ft", "spriteShader");
 
     // - map 
-    ResourceManager::LoadTexture("map/MarioMap.png", true, "MainMap");
+    ResourceManager::LoadTexture("map/MarioMap.png", false, "MainMap");
     ResourceManager::LoadTexture("map/Underground.png", true, "UndergroundMap");
     ResourceManager::LoadTexture("test.png", false, "test");
 
@@ -186,7 +189,7 @@ void Game::Respawn()
 
 void Game::ProcessPlayersDeath()
 {
-    ClearGameData();
+    ClearLevelData();
 
     player->Spawn();
 
@@ -198,7 +201,7 @@ void Game::ProcessPlayersDeath()
     timeCount = 100;
 }
 
-void Game::ClearGameData()
+void Game::ClearLevelData()
 {
     for (auto i : objList)
     {
@@ -206,6 +209,46 @@ void Game::ClearGameData()
     }
 
     DeleteObjects();
+}
+
+void Game::RefreshGameData()
+{
+    delete map;
+    delete menuCoin;
+
+    // objects
+    delete player;
+
+    // lists
+    for (size_t i = 0; i < objList.size(); ++i)
+    {
+        delete objList[i];
+    }
+    objList.clear();
+    animatedObj.clear();
+    moveableObj.clear();
+
+    grounds.clear();
+    tubes.clear();
+    bricks.clear();
+    coins.clear();
+    bullets.clear();
+    plants.clear();
+    stars.clear();
+
+    enemies.clear();
+    goombas.clear();
+    turtles.clear();
+    // ---------
+
+    Init();
+
+    gmState = MENU;
+    underworld = false, respawnCheck = false, deadOnce = false;
+    timeCount = 100;
+
+    camera.cameraPos = glm::vec3(0.0f, 0.0f, 1.0f);
+    camera.savePos = glm::vec3(0.0f);
 }
 
 // Actions
@@ -226,6 +269,8 @@ void Game::ProcessInput(float dt)
         // Jump
         if (this->Keys[GLFW_KEY_SPACE]) { 
             player->Jump(dt, this->KeysProcessed[GLFW_KEY_SPACE]); 
+
+            if (!this->KeysProcessed[GLFW_KEY_SPACE]) sound->play2D("../sounds/jump.wav");
             this->KeysProcessed[GLFW_KEY_SPACE] = true;
         }
 
@@ -248,7 +293,7 @@ void Game::ProcessInput(float dt)
         
         // Move screen
         float midScreenX = camera.cameraPos.x + this->width / 2.0f;
-        if (player->GetPos().x > midScreenX && !underworld) camera.cameraPos.x += player->GetPos().x - midScreenX;
+        if (player->GetPos().x > midScreenX && !underworld && camera.cameraPos.x + this->width < 21200.0f) camera.cameraPos.x += player->GetPos().x - midScreenX;
 
         if (this->Keys[GLFW_KEY_P]) gmState = MENU;
         
@@ -266,7 +311,11 @@ void Game::ProcessInput(float dt)
             this->KeysProcessed[GLFW_KEY_DOWN] = true;
         }
         else if (this->Keys[GLFW_KEY_ENTER]) {
-            if (cursorPos.y == this->height / 2.0f) gmState = ACTIVE;
+
+            if (cursorPos.y == this->height / 2.0f && (gmState == WIN || gmState == LOSS)) {
+                RefreshGameData();
+            }
+            else if (cursorPos.y == this->height / 2.0f && gmState == MENU) gmState = ACTIVE;
             else if (cursorPos.y == this->height / 2.0f + 40.0f) close = true;
         }
     }
@@ -290,42 +339,52 @@ void Game::Update(float dt)
         // interactions
         ProcessCollision(dt);
 
+        // Player death cases
+        
+            // - - - common death
         if (timeCount == 0) player->Death();
 
         if (player->IsDead() && player->GetLifes() > 0 && !deadOnce) {
             deadOnce = true;
             std::thread respawnTh([&]() {
-                std::this_thread::sleep_for(std::chrono::seconds(2));
+                std::this_thread::sleep_for(std::chrono::seconds(5));
                 respawnCheck = true;
                 });
             respawnTh.detach();
         }
+        else if (player->IsDead() && player->GetLifes() <= 0 && !deadOnce) gmState = LOSS;
 
-        player->Reload(bullets); // bullets are deleted after collision
-
-        if (player->GetPos().y >= this->height && !underworld && !deadOnce) { // abyss death
+            // - - - abyss death
+        if (player->GetPos().y >= this->height && !underworld && !deadOnce) { 
 
             player->Death();
 
             if (player->GetLifes() > 0) {
                 deadOnce = true;
                 std::thread respawnTh([&]() {
-                    std::this_thread::sleep_for(std::chrono::seconds(2));
+                    std::this_thread::sleep_for(std::chrono::seconds(5));
                     respawnCheck = true;
                     });
                 respawnTh.detach();
 
             }
+            else gmState = LOSS;
         }
 
         if (respawnCheck) ProcessPlayersDeath();
-        
+        // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+        player->Reload(bullets); // bullets are deleted after collision
+
         Timer();
 
         // delete
         DeleteObjects();
     }
-    else Menu();
+    else if (gmState == WIN) {
+        player->PlayEndAnimation(dt);
+    }
+    else if (gmState == MENU) Menu();
 }
 
 void Game::MoveObjects(float dt)
@@ -557,7 +616,7 @@ void Game::ProcessCollision(float dt)
     }
 
     // end game collision
-    // if (player->GetPos().x >= )
+    if (player->GetPos().x >= 19880.0f) gmState = WIN;
 }
 
 void Game::ProcessAnimation(float dt)
@@ -628,7 +687,13 @@ void Game::Render()
         }
         else DrawObject(player);
     }
-    else if (gmState == MENU) Menu();
+    else if (gmState == WIN) {
+        DrawObject(map);
+        if (player->GetPos().x < 20500.0f) DrawObject(player);
+        else EndMenu();
+    }
+    else if (gmState == LOSS) EndMenu();
+    else Menu();
 
     DrawStats();
     DrawObject(menuCoin);
@@ -704,6 +769,26 @@ void Game::Menu()
     text->RenderText("Exit", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f + 40.0f), 1.0f, glm::vec3(1.0f));
 
     text->RenderText("->", glm::vec2(cursorPos), 1.0f, glm::vec3(1.0f));
+}
+
+void Game::EndMenu()
+{
+    if (gmState == WIN) {
+        text->RenderText("YOU'VE WON!", glm::vec2(this->width / 2.0f - 125.0f, this->height / 2.0f - 116.0f), 1.75f, glm::vec3(0.75f));
+
+        text->RenderText("Restart", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f), 1.0f, glm::vec3(1.0f));
+        text->RenderText("Exit", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f + 40.0f), 1.0f, glm::vec3(1.0f));
+
+        text->RenderText("->", glm::vec2(cursorPos), 1.0f, glm::vec3(1.0f));
+    }
+    else {
+        text->RenderText("YOU'VE LOST!", glm::vec2(this->width / 2.0f - 135.0f, this->height / 2.0f - 116.0f), 1.75f, glm::vec3(0.75f));
+
+        text->RenderText("Restart", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f), 1.0f, glm::vec3(1.0f));
+        text->RenderText("Exit", glm::vec2(this->width / 2.0f - 20.0f, this->height / 2.0f + 40.0f), 1.0f, glm::vec3(1.0f));
+
+        text->RenderText("->", glm::vec2(cursorPos), 1.0f, glm::vec3(1.0f));
+    }
 }
 
 // Level  

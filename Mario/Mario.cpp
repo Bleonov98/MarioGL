@@ -105,6 +105,16 @@ void Mario::PlayAnimation()
 	if (frame == 0 || frame == 2) animToggle = !animToggle; // change from 0 to 2 and back
 }
 
+void Mario::PlayEndAnimation(float dt)
+{
+	if (position.y + size.y < 790.0f) position.y += speed * dt;
+	else {
+		isOnGround = true;
+		Action(dt, DIR_RIGHT);
+		PlayAnimation();
+	}
+}
+
 void Mario::Death() 
 {
 	if (isDead) return;
@@ -114,6 +124,7 @@ void Mario::Death()
 	isDead = true;
 	skipCollision = true;
 	isOnGround = false;
+	marioType = LITTLE;
 
 	vertSpeed = -jumpStrength;
 }

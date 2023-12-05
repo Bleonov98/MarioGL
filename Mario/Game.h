@@ -47,6 +47,7 @@ public:
 	// basics
 	void Init();
 	void Menu();
+	void EndMenu();
 
 	void ProcessInput(float dt);
 	void Update(float dt);
@@ -82,10 +83,13 @@ public:
 	void SpawnGoomba(glm::vec2 position);
 	void SpawnTurtle(glm::vec2 position);
 
+	// actions
 	void ChangeLocation();
 	void Respawn();
 	void ProcessPlayersDeath();
-	void ClearGameData();
+
+	void ClearLevelData();
+	void RefreshGameData();
 	
 	// pub vars
 	bool Keys[1024], KeysProcessed[1024], close = false;

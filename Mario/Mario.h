@@ -48,6 +48,7 @@ public:
 	float GetInertia() { return this->inertia; }
 
 	void PlayAnimation() override;
+	void PlayEndAnimation(float dt);
 
 	void Death() override;
 	void Spawn();
