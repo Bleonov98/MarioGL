@@ -73,7 +73,7 @@ void Mario::Jump(float dt, bool processed)
 		position.y -= 5.0f;
 	}
 	else if (!isOnGround) {
-		vertSpeed -= gravity / 3.0f;
+		if (vertSpeed > -jumpStrength) vertSpeed -= gravity / 3.0f;
 
 		if (lastDir == DIR_LEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
 		else if (lastDir == DIR_RIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));
