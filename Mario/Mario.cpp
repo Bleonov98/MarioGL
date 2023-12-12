@@ -34,7 +34,7 @@ void Mario::Action(float dt, MoveDirection direction)
 		}
 
 		if (inertia > 0.0f) {
-			inertia -= 1.1f;
+			inertia -= (speed * dt) * 5;
 			if (inertia < 0.0f) inertia = 0.0f;
 		}
 
@@ -46,7 +46,7 @@ void Mario::Action(float dt, MoveDirection direction)
 		}
 	}
 	else if (direction == DIR_LEFT || direction == DIR_RIGHT) {
-		if (inertia < 400.0f) inertia += 0.25f;
+		if (inertia < 300.0f) inertia += speed * dt;
 
 		if (lastDir != direction) inertia = 0.0f;
 		lastDir = direction;
@@ -69,11 +69,11 @@ void Mario::Action(float dt, MoveDirection direction)
 void Mario::Jump(float dt, bool processed)
 {
 	if (isOnGround && !processed) {
-		vertSpeed = -jumpStrength;
+		vertSpeed -= jumpStrength;
 		position.y -= 5.0f;
 	}
 	else if (!isOnGround) {
-		if (vertSpeed > -jumpStrength / 2.0f) vertSpeed -= gravity / 3.25f;
+		if (vertSpeed > -jumpStrength / 2.0f) vertSpeed -= gravity / 3.0f * dt;
 
 		if (lastDir == DIR_LEFT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_left_jump"));
 		else if (lastDir == DIR_RIGHT) SetTexture(ResourceManager::GetTexture(GetSprite() + "_right_jump"));

@@ -4,7 +4,7 @@ void DynamicObject::Drop(float dt)
 {
 	if (isOnGround) vertSpeed = 0.0f;
 	else {
-		if (vertSpeed <= 1400.0f) vertSpeed += gravity;
+		vertSpeed += gravity * dt;
 		position.y += vertSpeed * dt;
 	}
 }
