@@ -1,7 +1,7 @@
 #include "Texture.h"
 
 Texture::Texture()
-	: width(0), height(0), imgFormat(GL_RGB), intFormat(GL_RGB), wrapS(GL_REPEAT), wrapT(GL_REPEAT), filterMin(GL_LINEAR), filterMax(GL_LINEAR)
+	: width(0), height(0), imgFormat(GL_RGB), intFormat(GL_RGB), wrapS(GL_REPEAT), wrapT(GL_REPEAT), filterMin(GL_NEAREST), filterMax(GL_NEAREST)
 {
 	glGenTextures(1, &this->ID);
 }

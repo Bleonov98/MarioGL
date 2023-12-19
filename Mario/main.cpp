@@ -58,6 +58,8 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
+        if (deltaTime > 0.025f) deltaTime = 0.025f;
+
         // updating
         gameName.ProcessInput(deltaTime);
         gameName.Update(deltaTime);
